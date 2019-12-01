@@ -1,11 +1,13 @@
 mod util;
 mod day01;
 
+use std::error::Error;
+
 fn puzzle<T, A>(day: u8,
                 part: char,
-                parse: Box<dyn Fn(&str) -> Result<Vec<T>, Box<dyn std::error::Error>>>,
+                parse: Box<dyn Fn(&str) -> Result<Vec<T>, Box<dyn Error>>>,
                 solve: Box<dyn Fn(&[T]) -> A>)
-               -> Result<(), Box<dyn std::error::Error>>
+               -> Result<(), Box<dyn Error>>
                where A: std::fmt::Display {
     let input: Vec<T> = parse(&format!("input/day{:02}.txt", day))?;
     let start = std::time::SystemTime::now();
@@ -15,7 +17,7 @@ fn puzzle<T, A>(day: u8,
     Ok(())
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
 
     println!("Advent of Code 2019, by j0057");
 
