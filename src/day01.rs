@@ -3,15 +3,8 @@ fn fuel(mass: &u32) -> u32 {
 }
 
 fn total(mass: &u32) -> u32 {
-    let mut r: u32 = 0;
-    let mut m: u32 = *mass;
-    loop {
-        if m <= 6 { break };
-        let f: u32 = fuel(&m);
-        r += f;
-        m = f;
-    }
-    r
+    let f = fuel(mass);
+    f + if f < 6 { 0 } else { total(&f) }
 }
 
 pub fn day01a(mass: &[u32]) -> u32 {
