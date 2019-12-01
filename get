@@ -1,0 +1,4 @@
+#!/bin/bash
+year="${1?year required}"
+day="${2?day required}"
+curl -s -H "Cookie: session=$(cat .cookie)" "https://adventofcode.com/$year/day/$day/input" -o "$(printf 'input/day%02d.txt' $day)"
