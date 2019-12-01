@@ -1,0 +1,13 @@
+[package]
+name = "aoc2019"
+version = "0.0.1"
+authors = ["Joost Molenaar <jjm@j0057.nl>"]
+edition = "2018"
+
+[dependencies]
+
+[[bin]]
+name = "aoc2019"
+
+[profile.release]
+debug = true
