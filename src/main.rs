@@ -1,14 +1,15 @@
 mod util;
 mod day01;
 
-fn puzzle<T, U>(day: u8,
+fn puzzle<T, A>(day: u8,
                 part: char,
                 parse: Box<dyn Fn(&str) -> Result<Vec<T>, Box<dyn std::error::Error>>>,
-                solve: Box<dyn Fn(&[T]) -> U>)
-                -> Result<(), Box<dyn std::error::Error>> where U: std::fmt::Display {
+                solve: Box<dyn Fn(&[T]) -> A>)
+               -> Result<(), Box<dyn std::error::Error>>
+               where A: std::fmt::Display {
     let input: Vec<T> = parse(&format!("input/day{:02}.txt", day))?;
     let start = std::time::SystemTime::now();
-    let answer: U = solve(&input);
+    let answer: A = solve(&input);
     let elapsed = start.elapsed()?.as_micros();
     println!("problem: {:>2}{}; time: {:9} μs; answer: {}", day, part, elapsed, answer);
     Ok(())
