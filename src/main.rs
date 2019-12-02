@@ -1,5 +1,7 @@
 mod util;
+
 mod day01;
+mod day02;
 
 use std::ops::Deref;
 use std::fmt::Display;
@@ -26,6 +28,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     puzzle(1, 'a', Box::new(util::get_numbers::<u32>), Box::new(day01::day01a))?;
     puzzle(1, 'b', Box::new(util::get_numbers::<u32>), Box::new(day01::day01b))?;
+
+    puzzle(2, 'a', Box::new(util::get_splitted_commas_numbers::<usize>), Box::new(day02::day02a))?;
+    puzzle(2, 'b', Box::new(util::get_splitted_commas_numbers::<usize>), Box::new(day02::day02b))?;
 
     println!("--- --------- ---------------");
 
