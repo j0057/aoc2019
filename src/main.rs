@@ -14,16 +14,20 @@ fn puzzle<T: Deref<Target=U>, U: ?Sized, A: Display>(
     let input = parse(&format!("input/day{:02}.txt", day))?;
     let start = std::time::SystemTime::now();
     let answer = solve(&*input);
-    let elapsed = start.elapsed()?.as_micros();
-    println!("problem: {:>2}{}; time: {:9} μs; answer: {}", day, part, elapsed, answer);
+    let elapsed = start.elapsed()?.as_nanos();
+    println!("{0:>2}{1} {2:>9} {3:>15}", day, part, elapsed, answer);
     Ok(())
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    println!("Advent of Code 2019, by j0057");
+    println!("--- --------- ---------------");
+    println!(" #         ns         answer          Advent of Code 2019, by j0057 🎄");
+    println!("--- --------- ---------------");
 
     puzzle(1, 'A', Box::new(util::get_numbers::<u32>), Box::new(day01::day01a))?;
     puzzle(1, 'B', Box::new(util::get_numbers::<u32>), Box::new(day01::day01b))?;
+
+    println!("--- --------- ---------------");
 
     Ok(())
 }
