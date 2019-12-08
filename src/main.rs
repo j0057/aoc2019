@@ -26,8 +26,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!(" #         ns         answer          Advent of Code 2019, by j0057 🎄");
     println!("--- --------- ---------------");
 
-    puzzle(1, 'a', Box::new(util::get_numbers::<u32>), Box::new(day01::day01a))?;
-    puzzle(1, 'b', Box::new(util::get_numbers::<u32>), Box::new(day01::day01b))?;
+    puzzle(1, 'a', Box::new(util::get_parsed_lines::<u32>), Box::new(day01::day01a))?;
+    puzzle(1, 'b', Box::new(util::get_parsed_lines::<u32>), Box::new(day01::day01b))?;
 
     puzzle(2, 'a', Box::new(util::get_splitted_commas_numbers::<usize>), Box::new(day02::day02a))?;
     puzzle(2, 'b', Box::new(util::get_splitted_commas_numbers::<usize>), Box::new(day02::day02b))?;

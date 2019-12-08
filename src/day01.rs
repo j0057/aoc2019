@@ -31,7 +31,7 @@ mod test {
 
     #[test]
     fn test_01() -> Result<(), Box<dyn std::error::Error>> {
-        let masses: Vec<u32> = util::get_numbers::<u32>("input/day01.txt")?;
+        let masses: Vec<u32> = util::get_parsed_lines::<u32>("input/day01.txt")?;
         assert_eq!(super::day01a(&masses), 3374289);
         assert_eq!(super::day01b(&masses), 5058559);
         Ok(())
