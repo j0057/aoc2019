@@ -62,24 +62,17 @@ impl FromStr for Input {
  * Actual solution
  */
 
-fn trace_path(turns: &[Complex<i64>]) -> HashSet<Complex<i64>> {
-    let mut pos = Complex::<i64>::new(0, 0);
-    let mut res = HashSet::<Complex<i64>>::new();
-    for turn in turns {
-        let dir = turn.unscale(turn.l1_norm());
-        let end = pos + turn;
-        while pos != end {
-            pos += dir;
-            res.insert(pos);
-        }
-    }
-    res
+fn trace_path(turns: &[Complex<i64>]) -> impl Iterator<Item=Complex<i64>> + '_ {
+    turns
+        .iter()
+        .flat_map(|turn| std::iter::repeat(turn.unscale(turn.l1_norm())).take(turn.l1_norm() as usize))
+        .scan(Complex::<i64>::new(0, 0), |acc, step| { *acc += step ; Some(*acc) })
 }
 
 pub fn day03a(wires: &[Input]) -> i64 {
     let paths = wires
         .iter()
-        .map(|input| trace_path(&input.0))
+        .map(|input| trace_path(&input.0).collect::<HashSet<_>>())
         .collect::<Vec<_>>();
 
     paths[1..]
@@ -129,7 +122,7 @@ mod test {
 
     #[test]
     fn test_03_ex1() -> Result<(), Box<dyn Error>> {
-        let path = super::trace_path(&"R8,U5,L5,D3".parse::<super::Input>()?.0);
+        let path = super::trace_path(&"R8,U5,L5,D3".parse::<super::Input>()?.0).collect::<HashSet<_>>();
         let expected = [(0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7), (0, 8),
                         (-1, 8), (-2, 8), (-3, 8), (-4, 8), (-5, 8),
                         (-5, 7), (-5, 6), (-5, 5), (-5, 4), (-5, 3),
