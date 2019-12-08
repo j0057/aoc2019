@@ -2,6 +2,9 @@ mod util;
 
 mod day01;
 mod day02;
+mod day03;
+
+extern crate num_complex;
 
 use std::ops::Deref;
 use std::fmt::Display;
@@ -31,6 +34,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     puzzle(2, 'a', Box::new(util::get_splitted_commas_numbers::<usize>), Box::new(day02::day02a))?;
     puzzle(2, 'b', Box::new(util::get_splitted_commas_numbers::<usize>), Box::new(day02::day02b))?;
+
+    puzzle(3, 'a', Box::new(util::get_parsed_lines::<day03::Input>), Box::new(day03::day03a))?;
 
     println!("--- --------- ---------------");
 

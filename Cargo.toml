@@ -5,6 +5,7 @@ authors = ["Joost Molenaar <jjm@j0057.nl>"]
 edition = "2018"
 
 [dependencies]
+num-complex = "0.2"
 
 [[bin]]
 name = "aoc2019"
