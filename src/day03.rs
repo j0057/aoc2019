@@ -84,6 +84,29 @@ pub fn day03a(wires: &[Input]) -> i64 {
         .expect("no wire crossings found")
 }
 
+pub fn day03b(wires: &[Input]) -> i64 {
+    let paths = wires
+        .iter()
+        .map(|input| trace_path(&input.0).collect::<Vec<_>>())
+        .collect::<Vec<_>>();
+
+    let points = paths
+        .iter()
+        .map(|path| path.iter().collect::<HashSet<_>>())
+        .collect::<Vec<_>>();
+
+    points[1..]
+        .iter()
+        .fold(points[0].clone(), |item, other| item.intersection(other).cloned().collect())
+        .iter()
+        .map(|&pos| paths
+             .iter()
+             .map(|path| 1 + path.iter().position(|item| item == pos).unwrap() as i64)
+             .sum())
+        .min()
+        .expect("no wire crossings found")
+}
+
 /*
  * Unit tests
  */
@@ -155,9 +178,30 @@ mod test {
     }
 
     #[test]
+    fn test_03_ex4() -> Result<(), Box<dyn Error>> {
+        let input = ["R75,D30,R83,U83,L12,D49,R71,U7,L72", "U62,R66,U55,R34,D71,R55,D58,R83"]
+            .iter()
+            .map(|s| s.parse::<super::Input>())
+            .collect::<Result<Vec<_>, super::InputError>>()?;
+        assert_eq!(super::day03b(&input), 610);
+        Ok(())
+    }
+
+    #[test]
+    fn test_03_ex5() -> Result<(), Box<dyn Error>> {
+        let input = ["R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51", "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7"]
+            .iter()
+            .map(|s| s.parse::<super::Input>())
+            .collect::<Result<Vec<_>, super::InputError>>()?;
+        assert_eq!(super::day03b(&input), 410);
+        Ok(())
+    }
+
+    #[test]
     fn test_03() -> Result<(), Box<dyn Error>> {
         let wires = util::get_parsed_lines::<super::Input>("input/day03.txt")?;
         assert_eq!(super::day03a(&wires), 1225);
+        assert_eq!(super::day03b(&wires), 107036);
         Ok(())
     }
 }
