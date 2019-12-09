@@ -1,4 +1,4 @@
-pub fn run(m: &mut [i128]) -> () {
+pub fn run(m: &mut [i128], input: &mut Vec<i128>, output: &mut Vec<i128>) -> () {
     let mut ip = 0;
     loop {
         let p = |i| { match m[ip] / 10_i128.pow((i as u32)+1) % 10 {
@@ -15,6 +15,14 @@ pub fn run(m: &mut [i128]) -> () {
             2   => { m[m[ip+3] as usize] = p(1) * p(2);
                      ip += 4; },
 
+            // day 5 : in
+            3   => { m[m[ip+1] as usize] = input.remove(0);
+                     ip += 2; },
+
+            // day 5 : out
+            4   => { output.push(p(1));
+                     ip += 2; }
+
             // day 2 : halt
             99  => break,
 
@@ -26,7 +34,7 @@ pub fn run(m: &mut [i128]) -> () {
 
 pub fn run_inspect(program: &[i128], x: usize) -> i128 {
     let mut memory = program.to_vec();
-    run(&mut memory);
+    run(&mut memory, &mut vec![], &mut vec![]);
     memory[x]
 }
 
