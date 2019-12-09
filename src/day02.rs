@@ -1,13 +1,18 @@
 pub fn run(m: &mut [i128]) -> () {
     let mut ip = 0;
     loop {
-        match m[ip] {
+        let p = |i| { match m[ip] / 10_i128.pow((i as u32)+1) % 10 {
+                        0 => m[m[ip+i] as usize],
+                        1 =>   m[ip+i],
+                        _ => panic!("bad opcode {} at IP {}", m[ip], ip)
+                    } };
+        match m[ip] % 100 {
             // day 2 : add
-            1   => { m[m[ip+3] as usize] = m[m[ip+1] as usize] + m[m[ip+2] as usize];
+            1   => { m[m[ip+3] as usize] = p(1) + p(2);
                      ip += 4; },
 
             // day 2 : mul
-            2   => { m[m[ip+3] as usize] = m[m[ip+1] as usize] * m[m[ip+2] as usize];
+            2   => { m[m[ip+3] as usize] = p(1) * p(2);
                      ip += 4; },
 
             // day 2 : halt
