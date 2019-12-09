@@ -14,7 +14,7 @@ pub fn run(m: &mut [i128]) -> () {
             99  => break,
 
             // day 2 : wtf
-            _   => panic!(format!("unrecognized opcode {}; IP={}", m[ip], ip))
+            _   => panic!("unrecognized opcode {}; IP={}", m[ip], ip)
         }
     }
 }
