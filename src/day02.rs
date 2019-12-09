@@ -1,15 +1,13 @@
-pub fn run(m: &mut Vec<usize>) -> () {
+pub fn run(m: &mut [usize]) -> () {
     let mut ip = 0;
     loop {
         match m[ip] {
             // day 2 : add
-            1   => { let d = m[ip+3];
-                     m[d] = m[m[ip+1]] + m[m[ip+2]];
+            1   => { m[m[ip+3]] = m[m[ip+1]] + m[m[ip+2]];
                      ip += 4; },
 
             // day 2 : mul
-            2   => { let d = m[ip+3];
-                     m[d] = m[m[ip+1]] * m[m[ip+2]];
+            2   => { m[m[ip+3]] = m[m[ip+1]] * m[m[ip+2]];
                      ip += 4; },
 
             // day 2 : halt
