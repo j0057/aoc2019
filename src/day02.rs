@@ -1,13 +1,13 @@
-pub fn run(m: &mut [usize]) -> () {
+pub fn run(m: &mut [i128]) -> () {
     let mut ip = 0;
     loop {
         match m[ip] {
             // day 2 : add
-            1   => { m[m[ip+3]] = m[m[ip+1]] + m[m[ip+2]];
+            1   => { m[m[ip+3] as usize] = m[m[ip+1] as usize] + m[m[ip+2] as usize];
                      ip += 4; },
 
             // day 2 : mul
-            2   => { m[m[ip+3]] = m[m[ip+1]] * m[m[ip+2]];
+            2   => { m[m[ip+3] as usize] = m[m[ip+1] as usize] * m[m[ip+2] as usize];
                      ip += 4; },
 
             // day 2 : halt
@@ -19,20 +19,20 @@ pub fn run(m: &mut [usize]) -> () {
     }
 }
 
-pub fn run_inspect(program: &[usize], x: usize) -> usize {
+pub fn run_inspect(program: &[i128], x: usize) -> i128 {
     let mut memory = program.to_vec();
     run(&mut memory);
     memory[x]
 }
 
-pub fn day02a(program: &[usize]) -> usize {
+pub fn day02a(program: &[i128]) -> i128 {
     let mut m = program.to_vec();
     m[1] = 12;
     m[2] = 2;
     run_inspect(&m, 0)
 }
 
-pub fn day02b(program: &[usize]) -> usize {
+pub fn day02b(program: &[i128]) -> i128 {
     let mut m = program.to_vec();
     for noun in 0..100 {
         for verb in 0..100 {
@@ -74,7 +74,7 @@ mod test {
 
     #[test]
     fn test_02() -> Result<(), Box<dyn Error>> {
-        let program = util::get_splitted_commas_numbers::<usize>("input/day02.txt")?;
+        let program = util::get_splitted_commas_numbers::<i128>("input/day02.txt")?;
         assert_eq!(super::day02a(&program), 4930687);
         assert_eq!(super::day02b(&program), 5335);
         Ok(())
