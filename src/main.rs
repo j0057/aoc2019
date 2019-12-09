@@ -3,7 +3,9 @@ mod util;
 mod day01;
 mod day02;
 mod day03;
+mod day04;
 
+extern crate itertools;
 extern crate num_complex;
 
 use std::ops::Deref;
@@ -37,6 +39,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     puzzle(3, 'a', Box::new(util::get_parsed_lines::<day03::Input>), Box::new(day03::day03a))?;
     puzzle(3, 'b', Box::new(util::get_parsed_lines::<day03::Input>), Box::new(day03::day03b))?;
+
+    puzzle(4, 'a', Box::new(util::get_parsed_lines::<day04::Input>), Box::new(day04::day04a))?;
+    puzzle(4, 'b', Box::new(util::get_parsed_lines::<day04::Input>), Box::new(day04::day04b))?;
 
     println!("--- --------- ---------------");
 

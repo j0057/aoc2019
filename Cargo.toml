@@ -5,6 +5,7 @@ authors = ["Joost Molenaar <jjm@j0057.nl>"]
 edition = "2018"
 
 [dependencies]
+itertools = "0.8"
 num-complex = "0.2"
 
 [[bin]]
