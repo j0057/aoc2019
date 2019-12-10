@@ -32,26 +32,22 @@ pub fn run(m: &mut [i128], input: &mut Vec<i128>, output: &mut Vec<i128>) -> () 
     }
 }
 
-pub fn run_inspect(program: &[i128], x: usize) -> i128 {
-    let mut memory = program.to_vec();
-    run(&mut memory, &mut vec![], &mut vec![]);
-    memory[x]
-}
-
 pub fn day02a(program: &[i128]) -> i128 {
     let mut m = program.to_vec();
     m[1] = 12;
     m[2] = 2;
-    run_inspect(&m, 0)
+    run(&mut m, &mut vec![], &mut vec![]);
+    m[0]
 }
 
 pub fn day02b(program: &[i128]) -> i128 {
-    let mut m = program.to_vec();
     for noun in 0..100 {
         for verb in 0..100 {
+            let mut m = program.to_vec();
             m[1] = noun;
             m[2] = verb;
-            if run_inspect(&m, 0) == 19690720 {
+            run(&mut m, &mut vec![], &mut vec![]);
+            if m[0] == 19690720 {
                 return noun * 100 + verb;
             }
         }
@@ -67,22 +63,30 @@ mod test {
 
     #[test]
     fn test_02_ex1() {
-        assert_eq!(super::run_inspect(&[1, 0, 0, 0, 99], 0), 2);
+        let mut program = vec![1, 0, 0, 0, 99];
+        super::run(&mut program, &mut vec![], &mut vec![]);
+        assert_eq!(program, &[2, 0, 0, 0, 99]);
     }
 
     #[test]
     fn test_02_ex2() {
-        assert_eq!(super::run_inspect(&[2, 3, 0, 3, 99], 3), 6);
+        let mut program = vec![2, 3, 0, 3, 99];
+        super::run(&mut program, &mut vec![], &mut vec![]);
+        assert_eq!(program, &[2, 3, 0, 6, 99]);
     }
 
     #[test]
     fn test_02_ex3() {
-        assert_eq!(super::run_inspect(&[2, 4, 4, 5, 99, 0], 5), 9801);
+        let mut program = vec![2, 4, 4, 5, 99, 0];
+        super::run(&mut program, &mut vec![], &mut vec![]);
+        assert_eq!(program, &[2, 4, 4, 5, 99, 9801]);
     }
 
     #[test]
     fn test_02_ex4() {
-        assert_eq!(super::run_inspect(&[1, 1, 1, 4, 99, 5, 6, 0, 99], 0), 30);
+        let mut program = vec![1, 1, 1, 4, 99, 5, 6, 0, 99];
+        super::run(&mut program, &mut vec![], &mut vec![]);
+        assert_eq!(program, &[30, 1, 1, 4, 2, 5, 6, 0, 99]);
     }
 
     #[test]
