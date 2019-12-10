@@ -45,6 +45,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     puzzle(4, 'b', Box::new(util::get_parsed_lines::<day04::Input>), Box::new(day04::day04b))?;
 
     puzzle(5, 'a', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day05::day05a))?;
+    puzzle(5, 'b', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day05::day05b))?;
 
     println!("--- --------- ---------------");
 

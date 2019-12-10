@@ -8,6 +8,14 @@ pub fn day05a(program: &[i128]) -> i128 {
     *output.last().expect("program did not output anything")
 }
 
+pub fn day05b(program: &[i128]) -> i128 {
+    let mut memory = program.to_vec();
+    let mut input = vec![5];
+    let mut output = vec![];
+    day02::run(&mut memory, &mut input, &mut output);
+    *output.last().expect("program did not output anything")
+}
+
 #[cfg(test)]
 mod test {
     use std::error::Error;
@@ -34,9 +42,64 @@ mod test {
     }
 
     #[test]
+    fn test_05_ex3() { // using position mode, consider whether input is equal to 8
+        let mut program = vec![3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8];
+        let mut input = vec![8];
+        let mut output = vec![];
+        day02::run(&mut program, &mut input, &mut output);
+        assert_eq!(output, &[1]);
+    }
+
+    #[test]
+    fn test_05_ex4() { // using position mode, consider whether input is less than 8
+        let mut program = vec![3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8];
+        let mut input = vec![7];
+        let mut output = vec![];
+        day02::run(&mut program, &mut input, &mut output);
+        assert_eq!(output, &[1]);
+    }
+
+    #[test]
+    fn test_05_ex5() { // using immediate mode, consider whether the input is equal to 8
+        let mut program = vec![3, 3, 1108, -1, 8, 3, 4, 3, 99];
+        let mut input = vec![8];
+        let mut output = vec![];
+        day02::run(&mut program, &mut input, &mut output);
+        assert_eq!(output, &[1]);
+    }
+
+    #[test]
+    fn test_05_ex6() { // using immediate mode, consider whether the input is less than 8
+        let mut program = vec![3, 3, 1107, -1, 8, 3, 4, 3, 99];
+        let mut input = vec![7];
+        let mut output = vec![];
+        day02::run(&mut program, &mut input, &mut output);
+        assert_eq!(output, &[1]);
+    }
+
+    #[test]
+    fn test_05_ex7() { // using position mode and jump instructions, test whether input was 0
+        let mut program = vec![3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9];
+        let mut input = vec![0];
+        let mut output = vec![];
+        day02::run(&mut program, &mut input, &mut output);
+        assert_eq!(output, &[0]);
+    }
+
+    #[test]
+    fn test_05_ex8() { // using immediate mode and jump instructions, test whether input was 0
+        let mut program = vec![3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1];
+        let mut input = vec![0];
+        let mut output = vec![];
+        day02::run(&mut program, &mut input, &mut output);
+        assert_eq!(output, &[0]);
+    }
+
+    #[test]
     fn test_05() -> Result<(), Box<dyn Error>> {
         let program = util::get_splitted_commas_numbers::<i128>("input/day05.txt")?;
         assert_eq!(super::day05a(&program), 5346030);
+        assert_eq!(super::day05b(&program), 513116);
         Ok(())
     }
 }

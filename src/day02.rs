@@ -23,6 +23,20 @@ pub fn run(m: &mut [i128], input: &mut Vec<i128>, output: &mut Vec<i128>) -> () 
             4   => { output.push(p(1));
                      ip += 2; }
 
+            // day 5 : jnz
+            5   => { ip = if p(1) != 0 { p(2) as usize } else { ip + 3 } },
+
+            // day 5 : jz
+            6   => { ip = if p(1) == 0 { p(2) as usize } else { ip + 3 } },
+
+            // day 5 : lt
+            7   => { m[m[ip+3] as usize] = if p(1) < p(2) { 1 } else { 0 };
+                     ip += 4; },
+
+            // day 5 : eq
+            8   => { m[m[ip+3] as usize] = if p(1) == p(2) { 1 } else { 0 };
+                     ip += 4 },
+
             // day 2 : halt
             99  => break,
 
