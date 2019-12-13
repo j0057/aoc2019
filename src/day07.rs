@@ -2,7 +2,7 @@ use std::cell::RefCell;
 
 use permutohedron;
 
-use crate::day02;
+use crate::intcode;
 
 pub fn day07a(program: &[i128]) -> i128 {
     permutohedron::Heap::new(&mut [0, 1, 2, 3, 4])
@@ -12,7 +12,7 @@ pub fn day07a(program: &[i128]) -> i128 {
                 let mut m = program.to_vec();
                 let mut i = vec![phase, *state];
                 let mut o = vec![];
-                day02::run(&mut m, &mut i, &mut o);
+                intcode::run(&mut m, &mut i, &mut o);
                 *state = *o.last().unwrap();
                 Some(*state)
             })
@@ -26,7 +26,7 @@ pub fn day07a(program: &[i128]) -> i128 {
 pub fn day07b(p: &[i128]) -> i128 {
     let mut max = 0;
     for phases in permutohedron::Heap::new(&mut [5, 6, 7, 8, 9]) {
-        let st = &mut [day02::Status::Running, day02::Status::Running, day02::Status::Running, day02::Status::Running, day02::Status::Running];
+        let st = &mut [intcode::Status::Running, intcode::Status::Running, intcode::Status::Running, intcode::Status::Running, intcode::Status::Running];
         let ip = &mut [0, 0, 0, 0, 0];
         let m = &mut [p.to_vec(), p.to_vec(), p.to_vec(), p.to_vec(), p.to_vec()];
         let b = [RefCell::new(vec![]), RefCell::new(vec![]), RefCell::new(vec![]), RefCell::new(vec![]), RefCell::new(vec![])];
@@ -37,7 +37,7 @@ pub fn day07b(p: &[i128]) -> i128 {
         b[0].borrow_mut().push(0);
 
         loop {
-            if st.iter().all(|s| if let day02::Status::Halted = s { true } else { false }) {
+            if st.iter().all(|s| if let intcode::Status::Halted = s { true } else { false }) {
                 let v = b[0].borrow().last().unwrap().clone();
                 if v > max {
                     max = v;
@@ -45,10 +45,10 @@ pub fn day07b(p: &[i128]) -> i128 {
                 break;
             }
             for i in 0..=4 {
-                if let day02::Status::Halted = st[i] {
+                if let intcode::Status::Halted = st[i] {
                     continue
                 }
-                st[i] = day02::step(&mut ip[i], &mut m[i], &mut b[i].borrow_mut(), &mut b[(i+1)%5].borrow_mut());
+                st[i] = intcode::step(&mut ip[i], &mut m[i], &mut b[i].borrow_mut(), &mut b[(i+1)%5].borrow_mut());
                 //println!("Status:{:?}; machine:{:?}, IP:{:?}, buffers:{:?}", st[i], i, ip[i], b);
             }
         }

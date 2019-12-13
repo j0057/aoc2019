@@ -1,3 +1,4 @@
+mod intcode;
 mod util;
 
 mod day01;

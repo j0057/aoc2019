@@ -1,10 +1,10 @@
-use crate::day02;
+use crate::intcode;
 
 pub fn day05a(program: &[i128]) -> i128 {
     let mut memory = program.to_vec();
     let mut input = vec![1];
     let mut output = vec![];
-    day02::run(&mut memory, &mut input, &mut output);
+    intcode::run(&mut memory, &mut input, &mut output);
     *output.last().expect("program did not output anything")
 }
 
@@ -12,7 +12,7 @@ pub fn day05b(program: &[i128]) -> i128 {
     let mut memory = program.to_vec();
     let mut input = vec![5];
     let mut output = vec![];
-    day02::run(&mut memory, &mut input, &mut output);
+    intcode::run(&mut memory, &mut input, &mut output);
     *output.last().expect("program did not output anything")
 }
 
@@ -20,7 +20,7 @@ pub fn day05b(program: &[i128]) -> i128 {
 mod test {
     use std::error::Error;
 
-    use crate::day02;
+    use crate::intcode;
     use crate::util;
 
     #[test]
@@ -28,7 +28,7 @@ mod test {
         let mut program = vec![3, 0, 4, 0, 99];
         let mut input = vec![1234567890];
         let mut output = vec![];
-        day02::run(&mut program, &mut input, &mut output);
+        intcode::run(&mut program, &mut input, &mut output);
         assert_eq!(output, &[1234567890]);
     }
 
@@ -37,7 +37,7 @@ mod test {
         let mut program = vec![1002, 4, 3, 4, 33];
         let mut input = vec![];
         let mut output = vec![];
-        day02::run(&mut program, &mut input, &mut output);
+        intcode::run(&mut program, &mut input, &mut output);
         assert_eq!(program, &[1002, 4, 3, 4, 99]);
     }
 
@@ -46,7 +46,7 @@ mod test {
         let mut program = vec![3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8];
         let mut input = vec![8];
         let mut output = vec![];
-        day02::run(&mut program, &mut input, &mut output);
+        intcode::run(&mut program, &mut input, &mut output);
         assert_eq!(output, &[1]);
     }
 
@@ -55,7 +55,7 @@ mod test {
         let mut program = vec![3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8];
         let mut input = vec![7];
         let mut output = vec![];
-        day02::run(&mut program, &mut input, &mut output);
+        intcode::run(&mut program, &mut input, &mut output);
         assert_eq!(output, &[1]);
     }
 
@@ -64,7 +64,7 @@ mod test {
         let mut program = vec![3, 3, 1108, -1, 8, 3, 4, 3, 99];
         let mut input = vec![8];
         let mut output = vec![];
-        day02::run(&mut program, &mut input, &mut output);
+        intcode::run(&mut program, &mut input, &mut output);
         assert_eq!(output, &[1]);
     }
 
@@ -73,7 +73,7 @@ mod test {
         let mut program = vec![3, 3, 1107, -1, 8, 3, 4, 3, 99];
         let mut input = vec![7];
         let mut output = vec![];
-        day02::run(&mut program, &mut input, &mut output);
+        intcode::run(&mut program, &mut input, &mut output);
         assert_eq!(output, &[1]);
     }
 
@@ -82,7 +82,7 @@ mod test {
         let mut program = vec![3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9];
         let mut input = vec![0];
         let mut output = vec![];
-        day02::run(&mut program, &mut input, &mut output);
+        intcode::run(&mut program, &mut input, &mut output);
         assert_eq!(output, &[0]);
     }
 
@@ -91,7 +91,7 @@ mod test {
         let mut program = vec![3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1];
         let mut input = vec![0];
         let mut output = vec![];
-        day02::run(&mut program, &mut input, &mut output);
+        intcode::run(&mut program, &mut input, &mut output);
         assert_eq!(output, &[0]);
     }
 
