@@ -50,6 +50,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     puzzle(5, 'b', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day05::day05b))?;
 
     puzzle(7, 'a', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day07::day07a))?;
+    puzzle(7, 'b', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day07::day07b))?;
 
     println!("--- --------- ---------------");
 

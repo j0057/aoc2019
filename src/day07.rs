@@ -1,3 +1,5 @@
+use std::cell::RefCell;
+
 use permutohedron;
 
 use crate::day02;
@@ -19,6 +21,39 @@ pub fn day07a(program: &[i128]) -> i128 {
         )
         .max()
         .unwrap()
+}
+
+pub fn day07b(p: &[i128]) -> i128 {
+    let mut max = 0;
+    for phases in permutohedron::Heap::new(&mut [5, 6, 7, 8, 9]) {
+        let st = &mut [day02::Status::Running, day02::Status::Running, day02::Status::Running, day02::Status::Running, day02::Status::Running];
+        let mut ip = vec![0, 0, 0, 0, 0];
+        let m = &mut [p.to_vec(), p.to_vec(), p.to_vec(), p.to_vec(), p.to_vec()];
+        let b = [RefCell::new(vec![]), RefCell::new(vec![]), RefCell::new(vec![]), RefCell::new(vec![]), RefCell::new(vec![])];
+
+        for i in 0..=4 {
+            b[i].borrow_mut().push(phases[i]);
+        }
+        b[0].borrow_mut().push(0);
+
+        loop {
+            if st.iter().all(|s| if let day02::Status::Halted = s { true } else { false }) {
+                let v = b[0].borrow().last().unwrap().clone();
+                if v > max {
+                    max = v;
+                }
+                break;
+            }
+            for i in 0..=4 {
+                if let day02::Status::Halted = st[i] {
+                    continue
+                }
+                st[i] = day02::step(&mut ip[i], &mut m[i], &mut b[i].borrow_mut(), &mut b[(i+1)%5].borrow_mut());
+                //println!("Status:{:?}; machine:{:?}, IP:{:?}, buffers:{:?}", st[i], i, ip[i], b);
+            }
+        }
+    }
+    max
 }
 
 #[cfg(test)]
@@ -43,10 +78,20 @@ mod test {
     }
 
     #[test]
+    fn test_07_ex4() {
+        assert_eq!(super::day07b(&[3, 26, 1001, 26, -4, 26, 3, 27, 1002, 27, 2, 27, 1, 27, 26, 27, 4, 27, 1001, 28, -1, 28, 1005, 28, 6, 99, 0, 0, 5]), 139629729);
+    }
+
+    #[test]
+    fn test_07_ex5() {
+        assert_eq!(super::day07b(&[3, 52, 1001, 52, -5, 52, 3, 53, 1, 52, 56, 54, 1007, 54, 5, 55, 1005, 55, 26, 1001, 54, -5, 54, 1105, 1, 12, 1, 53, 54, 53, 1008, 54, 0, 55, 1001, 55, 1, 55, 2, 53, 55, 53, 4, 53, 1001, 56, -1, 56, 1005, 56, 6, 99, 0, 0, 0, 0, 10]), 18216);
+    }
+
+    #[test]
     fn test_07() -> Result<(), Box<dyn Error>> {
         let program = util::get_splitted_commas_numbers::<i128>("input/day07.txt")?;
         assert_eq!(super::day07a(&program), 22012);
+        assert_eq!(super::day07b(&program), 4039164);
         Ok(())
     }
-
 }
