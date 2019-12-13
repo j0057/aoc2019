@@ -27,7 +27,7 @@ pub fn day07b(p: &[i128]) -> i128 {
     let mut max = 0;
     for phases in permutohedron::Heap::new(&mut [5, 6, 7, 8, 9]) {
         let st = &mut [day02::Status::Running, day02::Status::Running, day02::Status::Running, day02::Status::Running, day02::Status::Running];
-        let mut ip = vec![0, 0, 0, 0, 0];
+        let ip = &mut [0, 0, 0, 0, 0];
         let m = &mut [p.to_vec(), p.to_vec(), p.to_vec(), p.to_vec(), p.to_vec()];
         let b = [RefCell::new(vec![]), RefCell::new(vec![]), RefCell::new(vec![]), RefCell::new(vec![]), RefCell::new(vec![])];
 
