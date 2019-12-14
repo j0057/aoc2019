@@ -18,18 +18,18 @@ pub fn run(m: &mut [i128], input: &mut Vec<i128>, output: &mut Vec<i128>) -> () 
 pub fn step(ip: &mut usize, m: &mut [i128], input: &mut Vec<i128>, output: &mut Vec<i128>) -> Status
 {
     loop {
-        let p = |i| { match m[*ip] / 10_i128.pow((i as u32)+1) % 10 {
-                        0 => m[m[*ip+i] as usize],
-                        1 =>   m[*ip+i],
-                        _ => panic!("bad opcode {} at IP {}", m[*ip] as usize, *ip)
-                    } };
+        let get = |i| { match m[*ip] / 10_i128.pow((i as u32)+1) % 10 {
+                            0 => m[m[*ip+i] as usize],
+                            1 =>   m[*ip+i],
+                            _ => panic!("bad opcode {} at IP {}", m[*ip] as usize, *ip)
+                      } };
         match m[*ip] % 100 {
             // day 2 : add
-            1   => { m[m[*ip+3] as usize] = p(1) + p(2);
+            1   => { m[m[*ip+3] as usize] = get(1) + get(2);
                      *ip += 4; },
 
             // day 2 : mul
-            2   => { m[m[*ip+3] as usize] = p(1) * p(2);
+            2   => { m[m[*ip+3] as usize] = get(1) * get(2);
                      *ip += 4; },
 
             // day 5 : in
@@ -40,22 +40,22 @@ pub fn step(ip: &mut usize, m: &mut [i128], input: &mut Vec<i128>, output: &mut 
                      *ip += 2; },
 
             // day 5 : out
-            4   => { output.push(p(1));
+            4   => { output.push(get(1));
                      *ip += 2;
                      return Status::Suspended; }
 
             // day 5 : jnz
-            5   => { *ip = if p(1) != 0 { p(2) as usize } else { *ip + 3 } },
+            5   => { *ip = if get(1) != 0 { get(2) as usize } else { *ip + 3 } },
 
             // day 5 : jz
-            6   => { *ip = if p(1) == 0 { p(2) as usize } else { *ip + 3 } },
+            6   => { *ip = if get(1) == 0 { get(2) as usize } else { *ip + 3 } },
 
             // day 5 : lt
-            7   => { m[m[*ip+3] as usize] = if p(1) < p(2) { 1 } else { 0 };
+            7   => { m[m[*ip+3] as usize] = if get(1) < get(2) { 1 } else { 0 };
                      *ip += 4; },
 
             // day 5 : eq
-            8   => { m[m[*ip+3] as usize] = if p(1) == p(2) { 1 } else { 0 };
+            8   => { m[m[*ip+3] as usize] = if get(1) == get(2) { 1 } else { 0 };
                      *ip += 4 },
 
             // day 2 : halt
