@@ -60,6 +60,10 @@ pub fn step(ip: &mut usize, bp: &mut usize, m: &mut [i128], input: &mut Vec<i128
             8   => { m[m[*ip+3] as usize] = if get(1) == get(2) { 1 } else { 0 };
                      *ip += 4 },
 
+            // day 9 : add bp
+            9   => { *bp += get(1) as usize;
+                     *ip += 2; },
+
             // day 2 : halt
             99  => return Status::Halted,
 
