@@ -28,6 +28,7 @@ pub fn day07b(p: &[i128]) -> i128 {
     for phases in permutohedron::Heap::new(&mut [5, 6, 7, 8, 9]) {
         let st = &mut [intcode::Status::Running, intcode::Status::Running, intcode::Status::Running, intcode::Status::Running, intcode::Status::Running];
         let ip = &mut [0, 0, 0, 0, 0];
+        let bp = &mut [0, 0, 0, 0, 0];
         let m = &mut [p.to_vec(), p.to_vec(), p.to_vec(), p.to_vec(), p.to_vec()];
         let b = [RefCell::new(vec![]), RefCell::new(vec![]), RefCell::new(vec![]), RefCell::new(vec![]), RefCell::new(vec![])];
 
@@ -48,7 +49,7 @@ pub fn day07b(p: &[i128]) -> i128 {
                 if let intcode::Status::Halted = st[i] {
                     continue
                 }
-                st[i] = intcode::step(&mut ip[i], &mut m[i], &mut b[i].borrow_mut(), &mut b[(i+1)%5].borrow_mut());
+                st[i] = intcode::step(&mut ip[i], &mut bp[i], &mut m[i], &mut b[i].borrow_mut(), &mut b[(i+1)%5].borrow_mut());
                 //println!("Status:{:?}; machine:{:?}, IP:{:?}, buffers:{:?}", st[i], i, ip[i], b);
             }
         }

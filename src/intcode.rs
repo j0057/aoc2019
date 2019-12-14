@@ -8,19 +8,21 @@ pub enum Status {
 
 pub fn run(m: &mut [i128], input: &mut Vec<i128>, output: &mut Vec<i128>) -> () {
     let mut ip = 0;
+    let mut bp = 0;
     loop {
-        if let Status::Halted = step(&mut ip, m, input, output) {
+        if let Status::Halted = step(&mut ip, &mut bp, m, input, output) {
             break;
         }
     }
 }
 
-pub fn step(ip: &mut usize, m: &mut [i128], input: &mut Vec<i128>, output: &mut Vec<i128>) -> Status
+pub fn step(ip: &mut usize, bp: &mut usize, m: &mut [i128], input: &mut Vec<i128>, output: &mut Vec<i128>) -> Status
 {
     loop {
         let get = |i| { match m[*ip] / 10_i128.pow((i as u32)+1) % 10 {
                             0 => m[m[*ip+i] as usize],
                             1 =>   m[*ip+i],
+                            2 => m[(m[*ip+i] + *bp as i128) as usize],
                             _ => panic!("bad opcode {} at IP {}", m[*ip] as usize, *ip)
                       } };
         match m[*ip] % 100 {
