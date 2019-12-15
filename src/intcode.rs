@@ -88,6 +88,9 @@ impl VM {
             2 => (self.memory[self.ip + i] + self.bp) as usize,
             _ => panic!("bad opcode {} at IP {}", self.memory[self.ip] as usize, self.ip)
         };
+        if o >= self.memory.len() {
+            self.memory.resize(o+1, 0);
+        }
         &mut self.memory[o]
     }
 }
