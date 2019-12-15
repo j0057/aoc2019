@@ -9,10 +9,10 @@ pub fn day07a(program: &[i128]) -> i128 {
         .map(|phases| phases
              .iter()
              .scan(0, |state, &phase| {
-                let mut m = program.to_vec();
+                let mut vm = intcode::VM::new(program);
                 let mut i = vec![phase, *state];
                 let mut o = vec![];
-                intcode::run(&mut m, &mut i, &mut o);
+                vm.run(&mut i, &mut o);
                 *state = *o.last().unwrap();
                 Some(*state)
             })
@@ -27,10 +27,8 @@ pub fn day07b(p: &[i128]) -> i128 {
     let mut max = 0;
     for phases in permutohedron::Heap::new(&mut [5, 6, 7, 8, 9]) {
         let st = &mut [intcode::Status::Running, intcode::Status::Running, intcode::Status::Running, intcode::Status::Running, intcode::Status::Running];
-        let ip = &mut [0, 0, 0, 0, 0];
-        let bp = &mut [0, 0, 0, 0, 0];
-        let m = &mut [p.to_vec(), p.to_vec(), p.to_vec(), p.to_vec(), p.to_vec()];
         let b = [RefCell::new(vec![]), RefCell::new(vec![]), RefCell::new(vec![]), RefCell::new(vec![]), RefCell::new(vec![])];
+        let vm = &mut [intcode::VM::new(p), intcode::VM::new(p), intcode::VM::new(p), intcode::VM::new(p), intcode::VM::new(p)];
 
         for i in 0..=4 {
             b[i].borrow_mut().push(phases[i]);
@@ -49,7 +47,7 @@ pub fn day07b(p: &[i128]) -> i128 {
                 if let intcode::Status::Halted = st[i] {
                     continue
                 }
-                st[i] = intcode::step(&mut ip[i], &mut bp[i], &mut m[i], &mut b[i].borrow_mut(), &mut b[(i+1)%5].borrow_mut());
+                st[i] = vm[i].step(&mut b[i].borrow_mut(), &mut b[(i+1)%5].borrow_mut());
                 //println!("Status:{:?}; machine:{:?}, IP:{:?}, buffers:{:?}", st[i], i, ip[i], b);
             }
         }

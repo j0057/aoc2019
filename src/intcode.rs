@@ -1,4 +1,11 @@
 #[derive(Debug)]
+pub struct VM {
+    pub memory: Vec<i128>,
+    pub ip: usize,
+    pub bp: i128,
+}
+
+#[derive(Debug)]
 pub enum Status {
     Running,
     Halted,
@@ -6,69 +13,81 @@ pub enum Status {
     Suspended
 }
 
-pub fn run(m: &mut [i128], input: &mut Vec<i128>, output: &mut Vec<i128>) -> () {
-    let mut ip = 0;
-    let mut bp = 0;
-    loop {
-        if let Status::Halted = step(&mut ip, &mut bp, m, input, output) {
-            break;
+impl VM {
+    pub fn new(program: &[i128]) -> VM {
+        let result = VM {
+            memory: program.to_vec(),
+            ip: 0,
+            bp: 0
+        };
+        result
+    }
+
+    pub fn run(&mut self, input: &mut Vec<i128>, output: &mut Vec<i128>) -> () {
+        loop {
+            if let Status::Halted = self.step(input, output) {
+                break;
+            }
         }
     }
-}
 
-pub fn step(ip: &mut usize, bp: &mut usize, m: &mut [i128], input: &mut Vec<i128>, output: &mut Vec<i128>) -> Status
-{
-    loop {
-        let get = |i| { match m[*ip] / 10_i128.pow((i as u32)+1) % 10 {
-                            0 => m[m[*ip+i] as usize],
-                            1 =>   m[*ip+i],
-                            2 => m[(m[*ip+i] + *bp as i128) as usize],
-                            _ => panic!("bad opcode {} at IP {}", m[*ip] as usize, *ip)
-                      } };
-        match m[*ip] % 100 {
-            // day 2 : add
-            1   => { m[m[*ip+3] as usize] = get(1) + get(2);
-                     *ip += 4; },
+    pub fn step(&mut self, input: &mut Vec<i128>, output: &mut Vec<i128>) -> Status {
+        loop {
+            match self.memory[self.ip] % 100 {
+                // day 2 : add
+                1   => { *self.arg(3) = *self.arg(1) + *self.arg(2);
+                         self.ip += 4; },
 
-            // day 2 : mul
-            2   => { m[m[*ip+3] as usize] = get(1) * get(2);
-                     *ip += 4; },
+                // day 2 : mul
+                2   => { *self.arg(3) = *self.arg(1) * *self.arg(2);
+                         self.ip += 4; },
 
-            // day 5 : in
-            3   => { if input.is_empty() {
-                        return Status::Blocked;
-                     }
-                     m[m[*ip+1] as usize] = input.remove(0);
-                     *ip += 2; },
+                // day 5 : in
+                3   => { if input.is_empty() {
+                            return Status::Blocked;
+                         }
+                         *self.arg(1) = input.remove(0);
+                         self.ip += 2; },
 
-            // day 5 : out
-            4   => { output.push(get(1));
-                     *ip += 2;
-                     return Status::Suspended; }
+                // day 5 : out
+                4   => { output.push(*self.arg(1));
+                         self.ip += 2;
+                         return Status::Suspended; }
 
-            // day 5 : jnz
-            5   => { *ip = if get(1) != 0 { get(2) as usize } else { *ip + 3 } },
+                // day 5 : jnz
+                5   => { self.ip = if *self.arg(1) != 0 { *self.arg(2) as usize } else { self.ip + 3 } },
 
-            // day 5 : jz
-            6   => { *ip = if get(1) == 0 { get(2) as usize } else { *ip + 3 } },
+                // day 5 : jz
+                6   => { self.ip = if *self.arg(1) == 0 { *self.arg(2) as usize } else { self.ip + 3 } },
 
-            // day 5 : lt
-            7   => { m[m[*ip+3] as usize] = if get(1) < get(2) { 1 } else { 0 };
-                     *ip += 4; },
+                // day 5 : lt
+                7   => { *self.arg(3) = if *self.arg(1) < *self.arg(2) { 1 } else { 0 };
+                         self.ip += 4; },
 
-            // day 5 : eq
-            8   => { m[m[*ip+3] as usize] = if get(1) == get(2) { 1 } else { 0 };
-                     *ip += 4 },
+                // day 5 : eq
+                8   => { *self.arg(3) = if *self.arg(1) == *self.arg(2) { 1 } else { 0 };
+                         self.ip += 4 },
 
-            // day 9 : add bp
-            9   => { *bp += get(1) as usize;
-                     *ip += 2; },
+                // day 9 : add bp
+                9   => { self.bp += *self.arg(1);
+                         self.ip += 2; },
 
-            // day 2 : halt
-            99  => return Status::Halted,
+                // day 2 : halt
+                99  => return Status::Halted,
 
-            // day 2 : wtf
-            _   => panic!("unrecognized opcode {}; IP={}", m[*ip], *ip)
+                // day 2 : wtf
+                _   => panic!("unrecognized opcode {}; IP={}", self.memory[self.ip], self.ip)
+            };
         }
+    }
+
+    fn arg<'a>(&'a mut self, i: usize) -> &'a mut i128 {
+        let o = match self.memory[self.ip] / 10_i128.pow((i as u32) + 1) % 10 {
+            0 => self.memory[self.ip + i] as usize,
+            1 => self.ip + i,
+            2 => (self.memory[self.ip + i] + self.bp) as usize,
+            _ => panic!("bad opcode {} at IP {}", self.memory[self.ip] as usize, self.ip)
+        };
+        &mut self.memory[o]
     }
 }
