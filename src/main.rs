@@ -17,6 +17,10 @@ use std::ops::Deref;
 use std::fmt::Display;
 use std::error::Error;
 
+fn format_thousands(n: u128) -> String {
+    if n > 0 { format!("{} {:3}", format_thousands(n / 1000), n % 1000) } else { "".to_owned() }
+}
+
 fn puzzle<T: Deref<Target=U>, U: ?Sized, A: Display>(
         day: u8,
         part: char,
@@ -26,15 +30,15 @@ fn puzzle<T: Deref<Target=U>, U: ?Sized, A: Display>(
     let input = parse(&format!("input/day{:02}.txt", day))?;
     let start = std::time::SystemTime::now();
     let answer = solve(&*input);
-    let elapsed = start.elapsed()?.as_nanos();
-    println!("{0:>2}{1} {2:>9} {3:>15}", day, part, elapsed, answer);
+    let ns = start.elapsed()?.as_nanos();
+    println!("{:>2}{} {:>15} {:>15}", day, part, format_thousands(ns), answer);
     Ok(())
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    println!("--- --------- ---------------");
-    println!(" #         ns         answer          Advent of Code 2019, by j0057 🎄");
-    println!("--- --------- ---------------");
+    println!("--- --------------- ---------------");
+    println!(" #    s  ms  μs  ns          answer           Advent of Code 2019, by j0057 🎄");
+    println!("--- --------------- ---------------");
 
     puzzle(1, 'a', Box::new(util::get_parsed_lines::<u32>), Box::new(day01::day01a))?;
     puzzle(1, 'b', Box::new(util::get_parsed_lines::<u32>), Box::new(day01::day01b))?;
@@ -57,7 +61,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     puzzle(9, 'a', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day09::day09a))?;
     puzzle(9, 'b', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day09::day09b))?;
 
-    println!("--- --------- ---------------");
+    println!("--- --------------- ---------------");
 
     Ok(())
 }
