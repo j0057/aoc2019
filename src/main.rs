@@ -7,6 +7,7 @@ mod day03;
 mod day04;
 mod day05;
 mod day07;
+mod day09;
 
 extern crate itertools;
 extern crate num_complex;
@@ -52,6 +53,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     puzzle(7, 'a', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day07::day07a))?;
     puzzle(7, 'b', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day07::day07b))?;
+
+    puzzle(9, 'a', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day09::day09a))?;
+    puzzle(9, 'b', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day09::day09b))?;
 
     println!("--- --------- ---------------");
 
