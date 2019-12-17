@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 #[derive(Debug)]
 pub struct VM {
     pub memory: Vec<i128>,
@@ -10,6 +12,18 @@ pub enum Status {
     Halted,
     Blocked,
     Suspended
+}
+
+impl FromStr for VM {
+    type Err = std::num::ParseIntError;
+
+    fn from_str(text: &str) -> Result<Self, Self::Err> {
+        let memory = text
+            .split(',')
+            .map(|s| s.trim().parse::<i128>())
+            .collect::<Result<Vec<i128>, std::num::ParseIntError>>()?;
+        Ok(VM::new(&memory))
+    }
 }
 
 impl VM {
