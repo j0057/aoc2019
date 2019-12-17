@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct VM {
     pub memory: Vec<i128>,
     pub ip: usize,
