@@ -13,7 +13,6 @@ extern crate itertools;
 extern crate num_complex;
 extern crate permutohedron;
 
-use std::ops::Deref;
 use std::fmt::Display;
 use std::error::Error;
 
@@ -21,7 +20,7 @@ fn format_thousands(n: u128) -> String {
     if n > 0 { format!("{} {:3}", format_thousands(n / 1000), n % 1000) } else { "".to_owned() }
 }
 
-fn puzzle<T: Deref<Target=U>, U: ?Sized, A: Display>(
+fn puzzle<T: AsRef<U>, U: ?Sized, A: Display>(
         day: u8,
         part: char,
         parse: Box<dyn Fn(&str) -> Result<T, Box<dyn Error>>>,
@@ -29,7 +28,7 @@ fn puzzle<T: Deref<Target=U>, U: ?Sized, A: Display>(
         -> Result<(), Box<dyn Error>> {
     let input = parse(&format!("input/day{:02}.txt", day))?;
     let start = std::time::SystemTime::now();
-    let answer = solve(&*input);
+    let answer = solve(input.as_ref());
     let ns = start.elapsed()?.as_nanos();
     println!("{:>2}{} {:>15} {:>15}", day, part, format_thousands(ns), answer);
     Ok(())

@@ -26,6 +26,12 @@ impl FromStr for VM {
     }
 }
 
+impl AsRef<VM> for VM {
+    fn as_ref(&self) -> &VM {
+        &self
+    }
+}
+
 impl VM {
     pub fn new(program: &[i128]) -> VM {
         let result = VM {
