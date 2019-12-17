@@ -16,6 +16,13 @@ pub fn get_splitted(filename: &str, ch: char) -> Result<Vec<String>, Box<dyn Err
     Ok(result)
 }
 
+pub fn get_line(filename: &str) -> Result<String, Box<dyn Error>> {
+    let file = std::fs::File::open(filename)?;
+    let reader = std::io::BufReader::new(file);
+    let result = reader.lines().nth(0).ok_or("no first line found")??;
+    Ok(result)
+}
+
 pub fn get_parsed_lines<T: FromStr>(filename: &str) -> Result<Vec<T>, Box<dyn Error>> where T::Err : Error + 'static {
     let result: Vec<T> = get_lines(filename)?
         .iter()
@@ -29,5 +36,10 @@ pub fn get_splitted_commas_numbers<T: FromStr<Err=ParseIntError>>(filename: &str
         .iter()
         .map(|s| s.trim().parse::<T>())
         .collect::<Result<Vec<T>, ParseIntError>>()?;
+    Ok(result)
+}
+
+pub fn get_parsed_line<T: FromStr>(filename: &str) -> Result<T, Box<dyn Error>> where T::Err : Error + 'static {
+    let result = get_line(filename)?.parse()?;
     Ok(result)
 }
