@@ -35,7 +35,7 @@ fn puzzle<T: Deref<Target=U>, U: ?Sized, A: Display>(
     Ok(())
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn puzzles() -> Result<(), Box<dyn Error>> {
     println!("--- --------------- ---------------");
     println!(" #    s  ms  μs  ns          answer           Advent of Code 2019, by j0057 🎄");
     println!("--- --------------- ---------------");
@@ -63,5 +63,14 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     println!("--- --------------- ---------------");
 
+    Ok(())
+}
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let arg = std::env::args().skip(1).nth(0);
+    match arg.as_ref().map(String::as_str) {
+        Some(_)     => (),
+        None        => puzzles()?
+    };
     Ok(())
 }
