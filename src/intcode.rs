@@ -7,7 +7,6 @@ pub struct VM {
 
 #[derive(Debug)]
 pub enum Status {
-    Running,
     Halted,
     Blocked,
     Suspended
