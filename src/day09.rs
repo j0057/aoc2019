@@ -1,18 +1,17 @@
 use crate::intcode;
 
-pub fn run_with_input(program: &[i128], input: &mut [i128]) -> i128 {
-    let mut vm = intcode::VM::new(program);
+pub fn run_with_input(vm: &mut intcode::VM, input: &[i128]) -> i128 {
     let mut output = vec![];
     vm.run(&mut input.to_vec(), &mut output);
     output.last().unwrap().clone()
 }
 
-pub fn day09a(program: &[i128]) -> i128 {
-    run_with_input(program, &mut [1])
+pub fn day09a(vm: &intcode::VM) -> i128 {
+    run_with_input(&mut vm.clone(), &[1])
 }
 
-pub fn day09b(program: &[i128]) -> i128 {
-    run_with_input(program, &mut [2])
+pub fn day09b(vm: &intcode::VM) -> i128 {
+    run_with_input(&mut vm.clone(), &[2])
 }
 
 #[cfg(test)]
@@ -26,7 +25,6 @@ mod test {
     fn test_09_ex1() { // should produce copy of itself as output (quine)
         let program = &[109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99];
         let mut vm = intcode::VM::new(program);
-        //vm.memory.resize(1024, 0);
         let mut output = vec![];
         vm.run(&mut vec![], &mut output);
         assert_eq!(output, program);
@@ -64,7 +62,7 @@ mod test {
 
     #[test]
     fn test_09() -> Result<(), Box<dyn Error>> {
-        let program = util::get_splitted_commas_numbers::<i128>("input/day09.txt")?;
+        let program = util::get_parsed_line::<intcode::VM>("input/day09.txt")?;
         assert_eq!(super::day09a(&program), 2932210790);
         assert_eq!(super::day09b(&program), 73144);
         Ok(())

@@ -1,15 +1,15 @@
 use crate::intcode;
 
-pub fn day05a(program: &[i128]) -> i128 {
-    let mut vm = intcode::VM::new(program);
+pub fn day05a(vm: &intcode::VM) -> i128 {
+    let mut vm = vm.clone();
     let mut input = vec![1];
     let mut output = vec![];
     vm.run(&mut input, &mut output);
     *output.last().expect("program did not output anything")
 }
 
-pub fn day05b(program: &[i128]) -> i128 {
-    let mut vm = intcode::VM::new(program);
+pub fn day05b(vm: &intcode::VM) -> i128 {
+    let mut vm = vm.clone();
     let mut input = vec![5];
     let mut output = vec![];
     vm.run(&mut input, &mut output);
@@ -97,9 +97,9 @@ mod test {
 
     #[test]
     fn test_05() -> Result<(), Box<dyn Error>> {
-        let program = util::get_splitted_commas_numbers::<i128>("input/day05.txt")?;
-        assert_eq!(super::day05a(&program), 5346030);
-        assert_eq!(super::day05b(&program), 513116);
+        let vm = util::get_parsed_line::<intcode::VM>("input/day05.txt")?;
+        assert_eq!(super::day05a(&vm), 5346030);
+        assert_eq!(super::day05b(&vm), 513116);
         Ok(())
     }
 }

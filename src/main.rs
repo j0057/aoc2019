@@ -42,8 +42,8 @@ fn puzzles() -> Result<(), Box<dyn Error>> {
     puzzle(1, 'a', Box::new(util::get_parsed_lines::<u32>), Box::new(day01::day01a))?;
     puzzle(1, 'b', Box::new(util::get_parsed_lines::<u32>), Box::new(day01::day01b))?;
 
-    puzzle(2, 'a', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day02::day02a))?;
-    puzzle(2, 'b', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day02::day02b))?;
+    puzzle(2, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day02::day02a))?;
+    puzzle(2, 'b', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day02::day02b))?;
 
     puzzle(3, 'a', Box::new(util::get_parsed_lines::<day03::Input>), Box::new(day03::day03a))?;
     puzzle(3, 'b', Box::new(util::get_parsed_lines::<day03::Input>), Box::new(day03::day03b))?;
@@ -51,14 +51,14 @@ fn puzzles() -> Result<(), Box<dyn Error>> {
     puzzle(4, 'a', Box::new(util::get_parsed_lines::<day04::Input>), Box::new(day04::day04a))?;
     puzzle(4, 'b', Box::new(util::get_parsed_lines::<day04::Input>), Box::new(day04::day04b))?;
 
-    puzzle(5, 'a', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day05::day05a))?;
-    puzzle(5, 'b', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day05::day05b))?;
+    puzzle(5, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day05::day05a))?;
+    puzzle(5, 'b', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day05::day05b))?;
 
-    puzzle(7, 'a', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day07::day07a))?;
-    puzzle(7, 'b', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day07::day07b))?;
+    puzzle(7, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day07::day07a))?;
+    puzzle(7, 'b', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day07::day07b))?;
 
-    puzzle(9, 'a', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day09::day09a))?;
-    puzzle(9, 'b', Box::new(util::get_splitted_commas_numbers::<i128>), Box::new(day09::day09b))?;
+    puzzle(9, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day09::day09a))?;
+    puzzle(9, 'b', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day09::day09b))?;
 
     println!("--- --------------- ---------------");
 

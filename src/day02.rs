@@ -1,22 +1,20 @@
 use crate::intcode;
 
-fn run_noun_verb(program: &[i128], noun: i128, verb: i128) -> i128 {
-    let mut memory = program.to_vec();
-    memory[1] = noun;
-    memory[2] = verb;
-    let mut vm = intcode::VM::new(&memory);
+fn run_noun_verb(vm: &mut intcode::VM, noun: i128, verb: i128) -> i128 {
+    vm.memory[1] = noun;
+    vm.memory[2] = verb;
     vm.run(&mut vec![], &mut vec![]);
     vm.memory[0]
 }
 
-pub fn day02a(program: &[i128]) -> i128 {
-    run_noun_verb(program, 12, 2)
+pub fn day02a(vm: &intcode::VM) -> i128 {
+    run_noun_verb(&mut vm.clone(), 12, 2)
 }
 
-pub fn day02b(program: &[i128]) -> i128 {
+pub fn day02b(vm: &intcode::VM) -> i128 {
     for noun in 0..100 {
         for verb in 0..100 {
-            if run_noun_verb(program, noun, verb) == 19690720 {
+            if run_noun_verb(&mut vm.clone(), noun, verb) == 19690720 {
                 return noun * 100 + verb;
             }
         }
@@ -61,9 +59,9 @@ mod test {
 
     #[test]
     fn test_02() -> Result<(), Box<dyn Error>> {
-        let program = util::get_splitted_commas_numbers::<i128>("input/day02.txt")?;
-        assert_eq!(super::day02a(&program), 4930687);
-        assert_eq!(super::day02b(&program), 5335);
+        let vm = util::get_parsed_line("input/day02.txt")?;
+        assert_eq!(super::day02a(&vm), 4930687);
+        assert_eq!(super::day02b(&vm), 5335);
         Ok(())
     }
 }
