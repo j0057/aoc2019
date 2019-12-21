@@ -8,6 +8,7 @@ mod day04;
 mod day05;
 mod day07;
 mod day09;
+mod day11;
 
 extern crate itertools;
 extern crate num_complex;
@@ -59,6 +60,8 @@ fn puzzles() -> Result<(), Box<dyn Error>> {
 
     puzzle(9, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day09::day09a))?;
     puzzle(9, 'b', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day09::day09b))?;
+
+    puzzle(11, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day11::day11a))?;
 
     println!("--- --------------- ---------------");
 
