@@ -5,6 +5,10 @@ use num_complex::Complex;
 
 use crate::intcode;
 
+// -i is up, +i is down, -1 is left, +1 is right
+static TURN_CCW: Complex<i32> = Complex { re: 0, im: -1 };
+static TURN_CW: Complex<i32> = Complex { re: 0, im: 1 };
+
 struct PaintRobot {
     vm: intcode::VM,
     out: Vec<i128>,
