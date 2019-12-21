@@ -1,0 +1,42 @@
+#!/usr/bin/python3
+
+import sys
+
+def get_code(fn):
+    with open(fn, 'r') as f:
+        return [int(x) for line in f for x in line.split(',')]
+
+def arg(n):
+    m = code[ip] // (10**(n+1)) % 10
+    if m == 0:
+        return f"[{code[ip+n]}]"
+    elif m == 1:
+        return f"{code[ip+n]}"
+    elif m == 2 and code[ip+n] >= 0:
+        return f"[bp+{code[ip+n]}]"
+    elif m == 2 and code[ip+n] < 0:
+        return f"[bp-{abs(code[ip+n])}]"
+    else:
+        raise Exception(str(m))
+
+OPS = {1: lambda: (4, f"ADD {arg(1)}, {arg(2)}, {arg(3)}"),
+       2: lambda: (4, f"MUL {arg(1)}, {arg(2)}, {arg(3)}"),
+       3: lambda: (2, f"IN  {arg(1)}"),
+       4: lambda: (2, f"OUT {arg(1)}"),
+       5: lambda: (3, f"JNZ {arg(1)}, {arg(2)}"),
+       6: lambda: (3, f"JZ  {arg(1)}, {arg(2)}"),
+       7: lambda: (4, f"LT  {arg(1)}, {arg(2)}, {arg(3)}"),
+       8: lambda: (4, f"EQ  {arg(1)}, {arg(2)}, {arg(3)}"),
+       9: lambda: (2, f"BP  {arg(1)}"),
+      99: lambda: (1, f"HLT")}
+
+ip = 0
+code = get_code(sys.argv[1])
+while ip < len(code):
+    try:
+        j, t = OPS[code[ip] % 100]()
+        print(f"{ip:-4}  {t}")
+        ip += j
+    except KeyError:
+        print(f"{ip:-4}  DW  #{code[ip]}")
+        ip += 1
