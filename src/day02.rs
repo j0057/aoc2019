@@ -3,7 +3,7 @@ use crate::intcode;
 fn run_noun_verb(vm: &mut intcode::VM, noun: i128, verb: i128) -> i128 {
     vm.memory[1] = noun;
     vm.memory[2] = verb;
-    vm.run(&mut vec![], &mut vec![]);
+    vm.run(&mut vec![]);
     vm.memory[0]
 }
 
@@ -32,28 +32,28 @@ mod test {
     #[test]
     fn test_02_ex1() {
         let mut vm = intcode::VM::new(&[1, 0, 0, 0, 99]);
-        vm.run(&mut vec![], &mut vec![]);
+        vm.run(&mut vec![]);
         assert_eq!(vm.memory, &[2, 0, 0, 0, 99]);
     }
 
     #[test]
     fn test_02_ex2() {
         let mut vm = intcode::VM::new(&[2, 3, 0, 3, 99]);
-        vm.run(&mut vec![], &mut vec![]);
+        vm.run(&mut vec![]);
         assert_eq!(vm.memory, &[2, 3, 0, 6, 99]);
     }
 
     #[test]
     fn test_02_ex3() {
         let mut vm = intcode::VM::new(&[2, 4, 4, 5, 99, 0]);
-        vm.run(&mut vec![], &mut vec![]);
+        vm.run(&mut vec![]);
         assert_eq!(vm.memory, &[2, 4, 4, 5, 99, 9801]);
     }
 
     #[test]
     fn test_02_ex4() {
         let mut vm = intcode::VM::new(&[1, 1, 1, 4, 99, 5, 6, 0, 99]);
-        vm.run(&mut vec![], &mut vec![]);
+        vm.run(&mut vec![]);
         assert_eq!(vm.memory, &[30, 1, 1, 4, 2, 5, 6, 0, 99]);
     }
 

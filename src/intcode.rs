@@ -42,10 +42,13 @@ impl VM {
         result
     }
 
-    pub fn run(&mut self, input: &mut Vec<i128>, output: &mut Vec<i128>) -> () {
+    pub fn run(&mut self, input: &mut Vec<i128>) -> Vec<i128> {
+        let mut output = vec![];
         loop {
-            if let Status::Halted = self.step(input, output) {
-                break;
+            match self.step(input, &mut output) {
+                Status::Halted      => return output,
+                Status::Blocked     => panic!("program wants to read from empty input"),
+                Status::Suspended   => continue,
             }
         }
     }

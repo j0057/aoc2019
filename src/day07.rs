@@ -10,10 +10,8 @@ pub fn day07a(vm: &intcode::VM) -> i128 {
              .iter()
              .scan(0, |state, &phase| {
                 let mut vm = vm.clone();
-                let mut i = vec![phase, *state];
-                let mut o = vec![];
-                vm.run(&mut i, &mut o);
-                *state = *o.last().unwrap();
+                let output = vm.run(&mut vec![phase, *state]);
+                *state = *output.last().unwrap();
                 Some(*state)
             })
             .last()

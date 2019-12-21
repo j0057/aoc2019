@@ -2,17 +2,13 @@ use crate::intcode;
 
 pub fn day05a(vm: &intcode::VM) -> i128 {
     let mut vm = vm.clone();
-    let mut input = vec![1];
-    let mut output = vec![];
-    vm.run(&mut input, &mut output);
+    let output = vm.run(&mut vec![1]);
     *output.last().expect("program did not output anything")
 }
 
 pub fn day05b(vm: &intcode::VM) -> i128 {
     let mut vm = vm.clone();
-    let mut input = vec![5];
-    let mut output = vec![];
-    vm.run(&mut input, &mut output);
+    let output = vm.run(&mut vec![5]);
     *output.last().expect("program did not output anything")
 }
 
@@ -26,72 +22,56 @@ mod test {
     #[test]
     fn test_05_ex1() { // outputs whatever it gets as input, then halts
         let mut vm = intcode::VM::new(&vec![3, 0, 4, 0, 99]);
-        let mut input = vec![1234567890];
-        let mut output = vec![];
-        vm.run(&mut input, &mut output);
+        let output = vm.run(&mut vec![1234567890]);
         assert_eq!(output, &[1234567890]);
     }
 
     #[test]
     fn test_05_ex2() { // multiply using position and immediate mode
         let mut vm = intcode::VM::new(&vec![1002, 4, 3, 4, 33]);
-        let mut input = vec![];
-        let mut output = vec![];
-        vm.run(&mut input, &mut output);
+        let _utput = vm.run(&mut vec![]);
         assert_eq!(vm.memory, &[1002, 4, 3, 4, 99]);
     }
 
     #[test]
     fn test_05_ex3() { // using position mode, consider whether input is equal to 8
         let mut vm = intcode::VM::new(&vec![3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8]);
-        let mut input = vec![8];
-        let mut output = vec![];
-        vm.run(&mut input, &mut output);
+        let output = vm.run(&mut vec![8]);
         assert_eq!(output, &[1]);
     }
 
     #[test]
     fn test_05_ex4() { // using position mode, consider whether input is less than 8
         let mut vm = intcode::VM::new(&vec![3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8]);
-        let mut input = vec![7];
-        let mut output = vec![];
-        vm.run(&mut input, &mut output);
+        let output = vm.run(&mut vec![7]);
         assert_eq!(output, &[1]);
     }
 
     #[test]
     fn test_05_ex5() { // using immediate mode, consider whether the input is equal to 8
         let mut vm = intcode::VM::new(&vec![3, 3, 1108, -1, 8, 3, 4, 3, 99]);
-        let mut input = vec![8];
-        let mut output = vec![];
-        vm.run(&mut input, &mut output);
+        let output = vm.run(&mut vec![8]);
         assert_eq!(output, &[1]);
     }
 
     #[test]
     fn test_05_ex6() { // using immediate mode, consider whether the input is less than 8
         let mut vm = intcode::VM::new(&vec![3, 3, 1107, -1, 8, 3, 4, 3, 99]);
-        let mut input = vec![7];
-        let mut output = vec![];
-        vm.run(&mut input, &mut output);
+        let output = vm.run(&mut vec![7]);
         assert_eq!(output, &[1]);
     }
 
     #[test]
     fn test_05_ex7() { // using position mode and jump instructions, test whether input was 0
         let mut vm = intcode::VM::new(&vec![3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9]);
-        let mut input = vec![0];
-        let mut output = vec![];
-        vm.run(&mut input, &mut output);
+        let output = vm.run(&mut vec![0]);
         assert_eq!(output, &[0]);
     }
 
     #[test]
     fn test_05_ex8() { // using immediate mode and jump instructions, test whether input was 0
         let mut vm = intcode::VM::new(&vec![3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1]);
-        let mut input = vec![0];
-        let mut output = vec![];
-        vm.run(&mut input, &mut output);
+        let output = vm.run(&mut vec![0]);
         assert_eq!(output, &[0]);
     }
 
