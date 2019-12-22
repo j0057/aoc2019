@@ -16,6 +16,7 @@ mod day11;
 extern crate itertools;
 extern crate num_complex;
 extern crate permutohedron;
+extern crate bytecount;
 
 use std::fmt::Display;
 use std::error::Error;

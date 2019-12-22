@@ -8,6 +8,7 @@ edition = "2018"
 itertools = "0.8"
 num-complex = "0.2"
 permutohedron = "0.2"
+bytecount = "0.6"
 
 [[bin]]
 name = "aoc2019"

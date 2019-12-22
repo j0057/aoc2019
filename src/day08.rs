@@ -1,6 +1,8 @@
 use std::num::ParseIntError;
 use std::str::FromStr;
 
+use bytecount;
+
 //
 // struct Input
 //
@@ -30,18 +32,17 @@ impl AsRef<Input> for Input {
 //
 
 /*
- * Clippy tells me that I appear to be counting bytes the naive way; I should use the bytecount
- * crate instead. This naive version runs in ~3800 ns.
+ * Thanks Clippy -- I naively used .iter().filter(...).count() which took ~3800 ns, but with the
+ * bytecount crate it runs more than twice as fast, ~1400 ns.
  *
  * --> https://rust-lang.github.io/rust-clippy/master/index.html#naive_bytecount
  */
-#[allow(clippy::naive_bytecount)]
 fn checksum(layers: &[u8], w: usize, h: usize) -> usize {
     let layer: &[u8] = layers
         .chunks(w * h)
-        .min_by_key(|ps| ps.iter().filter(|p| **p == 0).count())
+        .min_by_key(|ps| bytecount::count(ps, 0))
         .unwrap();
-    layer.iter().filter(|p| **p == 1).count() * layer.iter().filter(|p| **p == 2).count()
+    bytecount::count(layer, 1) * bytecount::count(layer, 2)
 }
 
 pub fn day08a(input: &Input) -> usize {
