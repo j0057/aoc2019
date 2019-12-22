@@ -7,6 +7,7 @@ mod day02;
 mod day03;
 mod day04;
 mod day05;
+mod day06;
 mod day07;
 mod day09;
 mod day11;
@@ -57,6 +58,9 @@ fn puzzles() -> Result<(), Box<dyn Error>> {
 
     puzzle(5, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day05::day05a))?;
     puzzle(5, 'b', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day05::day05b))?;
+
+    puzzle(6, 'a', Box::new(util::get_parsed_lines::<day06::Input>), Box::new(day06::day06a))?;
+    puzzle(6, 'b', Box::new(util::get_parsed_lines::<day06::Input>), Box::new(day06::day06b))?;
 
     puzzle(7, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day07::day07a))?;
     puzzle(7, 'b', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day07::day07b))?;
