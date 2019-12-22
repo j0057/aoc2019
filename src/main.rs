@@ -22,10 +22,12 @@ fn format_thousands(n: u128) -> String {
     if n > 0 { format!("{} {:3}", format_thousands(n / 1000), n % 1000) } else { "".to_owned() }
 }
 
+type ParseFn<T> = dyn Fn(&str) -> Result<T, Box<dyn Error>>;
+
 fn puzzle<T: AsRef<U>, U: ?Sized, A: Display>(
         day: u8,
         part: char,
-        parse: Box<dyn Fn(&str) -> Result<T, Box<dyn Error>>>,
+        parse: Box<ParseFn<T>>,
         solve: Box<dyn Fn(&U) -> A>)
         -> Result<(), Box<dyn Error>> {
     let input = parse(&format!("input/day{:02}.txt", day))?;

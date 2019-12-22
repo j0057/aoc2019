@@ -11,6 +11,7 @@ pub fn day02a(vm: &intcode::VM) -> i128 {
     run_noun_verb(&mut vm.clone(), 12, 2)
 }
 
+#[allow(clippy::unreadable_literal)]
 pub fn day02b(vm: &intcode::VM) -> i128 {
     for noun in 0..100 {
         for verb in 0..100 {

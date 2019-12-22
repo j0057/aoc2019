@@ -35,7 +35,7 @@ pub fn day07b(vm: &intcode::VM) -> i128 {
 
         loop {
             if st.iter().all(|s| if let intcode::Status::Halted = s { true } else { false }) {
-                let v = b[0].borrow().last().unwrap().clone();
+                let v = *b[0].borrow().last().unwrap();
                 if v > max {
                     max = v;
                 }

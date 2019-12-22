@@ -2,7 +2,7 @@ use crate::intcode;
 
 pub fn run_with_input(vm: &mut intcode::VM, input: &[i128]) -> i128 {
     let output = vm.run(&mut input.to_vec());
-    output.last().unwrap().clone()
+    *output.last().unwrap()
 }
 
 pub fn day09a(vm: &intcode::VM) -> i128 {

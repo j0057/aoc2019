@@ -1,7 +1,9 @@
+#[allow(clippy::trivially_copy_pass_by_ref)]
 fn fuel(mass: &u32) -> u32 {
     mass / 3 - 2
 }
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
 fn total(mass: &u32) -> u32 {
     let f = fuel(mass);
     f + if f < 6 { 0 } else { total(&f) }

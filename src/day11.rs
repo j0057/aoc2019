@@ -77,7 +77,7 @@ impl Iterator for PaintRobot {
         self.pos += self.dir;
 
         // return iteration step
-        Some((self.pos.clone(), self.dir.clone(), new_color))
+        Some((self.pos, self.dir, new_color))
     }
 }
 
@@ -97,16 +97,16 @@ pub fn day11_main(vm: &intcode::VM) -> Result<(), Box<dyn Error>> {
     let min_y = path.iter().map(|(pos, dir, _)| (pos - dir).im).min().unwrap();
     let max_y = path.iter().map(|(pos, dir, _)| (pos - dir).im).max().unwrap();
     let mut stdout = std::io::stdout();
-    stdout.write(csiseq::CLEAR_SCREEN)?;
+    stdout.write_all(csiseq::CLEAR_SCREEN)?;
     stdout.flush()?;
     for (pos, dir, new_color) in &path {
         let pos = pos - dir;
-        stdout.write(&csiseq::move_cursor(pos.im + min_y.abs() + 1, pos.re + min_x.abs() + 1))?;
-        stdout.write(if *new_color == 0 { b" " } else { b"@" })?;
+        stdout.write_all(&csiseq::move_cursor(pos.im + min_y.abs() + 1, pos.re + min_x.abs() + 1))?;
+        stdout.write_all(if *new_color == 0 { b" " } else { b"@" })?;
         stdout.flush()?;
         std::thread::sleep(std::time::Duration::from_millis(10));
     }
-    stdout.write(&csiseq::move_cursor(max_y + min_y.abs() + 2, 1))?;
+    stdout.write_all(&csiseq::move_cursor(max_y + min_y.abs() + 2, 1))?;
     stdout.flush()?;
     Ok(())
 }

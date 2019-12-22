@@ -34,12 +34,11 @@ impl AsRef<VM> for VM {
 
 impl VM {
     pub fn new(program: &[i128]) -> VM {
-        let result = VM {
+        VM {
             memory: program.to_vec(),
             ip: 0,
             bp: 0
-        };
-        result
+        }
     }
 
     pub fn run(&mut self, input: &mut Vec<i128>) -> Vec<i128> {
@@ -103,7 +102,7 @@ impl VM {
         }
     }
 
-    fn arg<'a>(&'a mut self, i: usize) -> &'a mut i128 {
+    fn arg(&mut self, i: usize) -> &mut i128 {
         let o = match self.memory[self.ip] / 10_i128.pow((i as u32) + 1) % 10 {
             0 => self.memory[self.ip + i] as usize,
             1 => self.ip + i,
