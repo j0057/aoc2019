@@ -1,9 +1,11 @@
 use std::collections::{HashMap, HashSet};
 use std::error::Error;
+use std::io::Write;
 
 use num_complex::Complex;
 
 use crate::intcode;
+use crate::csiseq;
 
 // -i is up, +i is down, -1 is left, +1 is right
 static TURN_CCW: Complex<i32> = Complex { re: 0, im: -1 };
@@ -32,7 +34,7 @@ impl PaintRobot {
 }
 
 impl Iterator for PaintRobot {
-    type Item = (Complex<i32>, Complex<i32>, Complex<i32>, i128);
+    type Item = (Complex<i32>, Complex<i32>, i128);
 
     // input color for current position
     // outputs two values: 1) color and 2) turn [1 for CW, 0 for CCW]
@@ -70,23 +72,43 @@ impl Iterator for PaintRobot {
         *self.grid.entry(self.pos).or_insert(0) = new_color;
 
         // update direction and position with second output
-        let prev_pos = self.pos;
         let turn = self.out.remove(0);
-        //println!("color={:?} turn={:?}", new_color, turn);
         self.dir *= if turn == 0 { TURN_CCW } else { TURN_CW };
         self.pos += self.dir;
 
         // return iteration step
-        Some((self.pos.clone(), self.dir.clone(), prev_pos, new_color))
+        Some((self.pos.clone(), self.dir.clone(), new_color))
     }
 }
 
 pub fn day11a(vm: &intcode::VM) -> i128 {
     PaintRobot::new(vm)
-        .filter(|(_, _, _, color)| *color == 1)
-        .map(|(_, _, prev_pos, _)| prev_pos)
+        .filter(|(_, _, color)| *color == 1)
+        .map(|(pos, dir, _)| pos - dir)
         .collect::<HashSet<_>>()
         .len() as i128
+}
+
+pub fn day11_main(vm: &intcode::VM) -> Result<(), Box<dyn Error>> {
+    let mut robot = PaintRobot::new(vm);
+    robot.grid.insert(Complex::new(0, 0), 1);
+    let path = robot.collect::<Vec<_>>();
+    let min_x = path.iter().map(|(pos, dir, _)| (pos - dir).re).min().unwrap();
+    let min_y = path.iter().map(|(pos, dir, _)| (pos - dir).im).min().unwrap();
+    let max_y = path.iter().map(|(pos, dir, _)| (pos - dir).im).max().unwrap();
+    let mut stdout = std::io::stdout();
+    stdout.write(csiseq::CLEAR_SCREEN)?;
+    stdout.flush()?;
+    for (pos, dir, new_color) in &path {
+        let pos = pos - dir;
+        stdout.write(&csiseq::move_cursor(pos.im + min_y.abs() + 1, pos.re + min_x.abs() + 1))?;
+        stdout.write(if *new_color == 0 { b" " } else { b"@" })?;
+        stdout.flush()?;
+        std::thread::sleep(std::time::Duration::from_millis(10));
+    }
+    stdout.write(&csiseq::move_cursor(max_y + min_y.abs() + 2, 1))?;
+    stdout.flush()?;
+    Ok(())
 }
 
 #[cfg(test)]
