@@ -82,6 +82,8 @@ fn puzzles() -> Result<(), Box<dyn Error>> {
 fn main() -> Result<(), Box<dyn Error>> {
     let arg = std::env::args().skip(1).nth(0);
     match arg.as_ref().map(String::as_str) {
+        Some("8b")  => { let input = util::get_parsed_line::<day08::Input>("input/day08.txt")?;
+                         day08::day08_main(&input); },
         Some("11b") => { let input = util::get_parsed_line::<intcode::VM>("input/day11.txt")?;
                          day11::day11_main(&input)?; },
         Some(_)     => (),

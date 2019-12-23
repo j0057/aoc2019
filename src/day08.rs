@@ -22,8 +22,8 @@ impl FromStr for Input {
 }
 
 impl AsRef<Input> for Input {
-    fn as_ref(self: &Self) -> &Self {
-        self
+    fn as_ref(&self) -> &Self {
+        &self
     }
 }
 
@@ -45,8 +45,25 @@ fn checksum(layers: &[u8], w: usize, h: usize) -> usize {
     bytecount::count(layer, 1) * bytecount::count(layer, 2)
 }
 
+fn combine(data: &[u8], w: usize, h: usize) -> Vec<u8> {
+    let layers = data
+        .chunks(w * h)
+        .map(|layer| layer.to_vec())
+        .collect::<Vec<Vec<u8>>>();
+    (0..layers[0].len())
+        .map(|i| layers.iter().skip_while(|v| v[i] == 2).nth(0).unwrap()[i])
+        .collect::<Vec<u8>>()
+}
+
 pub fn day08a(input: &Input) -> usize {
     checksum(&input.0, 25, 6)
+}
+
+pub fn day08_main(input: &Input) {
+    combine(&input.0, 25, 6)
+        .chunks(25)
+        .map(|row| row.iter().map(|p| &[' ', '@'][*p as usize]).collect::<String>())
+        .for_each(|row| println!("{}", row))
 }
 
 //
@@ -64,6 +81,14 @@ mod test {
         let input = "123456789012".parse::<super::Input>()?;
         let result = super::checksum(&input.0, 2, 3);
         assert_eq!(result, 1);
+        Ok(())
+    }
+
+    #[test]
+    fn test_08_ex2() -> Result<(), Box<dyn Error>> {
+        let input = "0222112222120000".parse::<super::Input>()?;
+        let result = super::combine(&input.0, 2, 2);
+        assert_eq!(result, &[0, 1, 1, 0]);
         Ok(())
     }
 
