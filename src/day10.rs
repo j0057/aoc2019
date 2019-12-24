@@ -42,15 +42,12 @@ impl FromStr for Input {
             .split('\n')
             .enumerate()
             .flat_map(|(y, line)| line.chars().enumerate().map(move |(x, ch)| (y as f64, x as f64, ch)))
-            .map(|(y, x, ch)| match ch {
-                '.' => Ok(None),
-                '#' => Ok(Some(Complex::new(x, y))),
-                 x  => Err(InputError::Parse(Some(x)))
+            .filter_map(|(y, x, ch)| match ch {
+                '.' => None,
+                '#' => Some(Ok(Complex::new(x, y))),
+                chr => Some(Err(InputError::Parse(Some(chr))))
             })
-            .collect::<Result<Vec<Option<Complex<f64>>>, InputError>>()?
-            .iter()
-            .flat_map(|opt| *opt)
-            .collect::<Vec<_>>();
+            .collect::<Result<Vec<Complex<f64>>, InputError>>()?;
         Ok(Input(c))
     }
 
