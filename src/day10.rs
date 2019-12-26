@@ -1,5 +1,3 @@
-use std::fmt::Display;
-use std::error::Error;
 use std::str::FromStr;
 use std::collections::HashSet;
 use std::f64::consts::PI;
@@ -10,21 +8,10 @@ use num_complex::Complex;
 // enum InputError
 //
 
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum InputError {
+    #[error("error parsing character {0:?}")]
     Parse(Option<char>)
-}
-
-impl Error for InputError {
-}
-
-impl Display for InputError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            InputError::Parse(ch) => write!(f, "error parsing character {:?}", ch),
-        }
-    }
-
 }
 
 //

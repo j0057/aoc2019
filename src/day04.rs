@@ -2,12 +2,16 @@ use std::str::FromStr;
 
 use itertools::Itertools;
 
-use crate::day03;
-
 pub struct Input(u64, u64);
 
+#[derive(Debug, thiserror::Error)]
+pub enum InputError {
+    #[error("Error parsing number: {0:?}")]
+    ParseInt(#[from] std::num::ParseIntError)
+}
+
 impl FromStr for Input {
-    type Err = day03::InputError;
+    type Err = InputError;
 
     fn from_str(text: &str) -> Result<Self, Self::Err> {
         let parts = text.split('-').collect::<Vec<_>>();

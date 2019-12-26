@@ -18,6 +18,7 @@ extern crate itertools;
 extern crate num_complex;
 extern crate permutohedron;
 extern crate bytecount;
+extern crate thiserror;
 
 use std::fmt::Display;
 use std::error::Error;

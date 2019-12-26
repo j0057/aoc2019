@@ -14,8 +14,14 @@ pub enum Status {
     Suspended
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum InputError {
+    #[error("Cannot parse number {0:?}")]
+    Parse(#[from] std::num::ParseIntError)
+}
+
 impl FromStr for VM {
-    type Err = std::num::ParseIntError;
+    type Err = InputError;
 
     fn from_str(text: &str) -> Result<Self, Self::Err> {
         let memory = text

@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::collections::HashSet;
 use std::str::FromStr;
 use std::num;
@@ -9,28 +8,12 @@ use num_complex::Complex;
  * InputError - Error implementation for Input
  */
 
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum InputError {
+    #[error("unknown direction: {0:?}")]
     UnknownDirection(Option<char>),
-    BadValue(num::ParseIntError)
-}
-
-impl std::fmt::Display for InputError {
-    fn fmt(self: &Self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            InputError::UnknownDirection(_) => write!(f, "UnknownDirection"),
-            InputError::BadValue(e) => write!(f, "BadValue({})", e)
-        }
-    }
-}
-
-impl Error for InputError {
-}
-
-impl From<num::ParseIntError> for InputError {
-    fn from(e: num::ParseIntError) -> Self {
-        InputError::BadValue(e)
-    }
+    #[error("bad value: {0}")]
+    BadValue(#[from] num::ParseIntError)
 }
 
 /*

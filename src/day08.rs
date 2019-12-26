@@ -4,13 +4,23 @@ use std::str::FromStr;
 use bytecount;
 
 //
+// enum InputError
+//
+
+#[derive(Debug, thiserror::Error)]
+pub enum InputError {
+    #[error("Cannot parse number {0:?}")]
+    Parse(#[from] ParseIntError)
+}
+
+//
 // struct Input
 //
 
 pub struct Input(Vec<u8>);
 
 impl FromStr for Input {
-    type Err = ParseIntError;
+    type Err = InputError;
 
     fn from_str(line: &str) -> Result<Self, Self::Err> {
         let result = line.bytes()

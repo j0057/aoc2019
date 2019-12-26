@@ -1,27 +1,14 @@
-use std::fmt;
 use std::collections::HashMap;
-use std::error::Error;
 use std::str::FromStr;
-
 
 //
 // enum InputError
 //
 
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum InputError {
+    #[error("unable to parse string {0:?}")]
     Parse(String),
-}
-
-impl fmt::Display for InputError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            InputError::Parse(s) => write!(f, "ParseError: unable to parse string '{:?}'", s),
-        }
-    }
-}
-
-impl Error for InputError {
 }
 
 //
