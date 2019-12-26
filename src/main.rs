@@ -75,6 +75,7 @@ fn puzzles() -> Result<(), Box<dyn Error>> {
     puzzle(9, 'b', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day09::day09b))?;
 
     puzzle(10, 'a', Box::new(util::get_parsed::<day10::Input>), Box::new(day10::day10a))?;
+    puzzle(10, 'b', Box::new(util::get_parsed::<day10::Input>), Box::new(day10::day10b))?;
 
     puzzle(11, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day11::day11a))?;
 

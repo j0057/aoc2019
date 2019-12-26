@@ -49,6 +49,61 @@ impl AsRef<Input> for Input {
 }
 
 //
+// struct AsteroidShooter
+//
+
+#[derive(Debug)]
+struct AsteroidShooter {
+    asteroids: Vec<(i64, i64, (i64, i64))>,
+}
+
+impl AsteroidShooter {
+    fn new(asteroids: &[Complex<f64>]) -> AsteroidShooter {
+        let (base, _count) = best_asteroid(asteroids);
+
+        let mut result = AsteroidShooter {
+            asteroids: asteroids
+                .iter()
+                .filter(|&&x| x != base)
+                .map(|x| (x, (x-base).to_polar()))
+                .map(|(x, (dist, angle))| (mdeg(angle + PI), dist as i64, (x.im as i64, x.re as i64)))
+                .collect::<Vec<_>>()
+        };
+
+        result.asteroids.sort();
+
+        while result.asteroids[0].0 < 90_000 {
+            result.asteroids.rotate_left(1);
+        }
+
+        result
+    }
+}
+
+impl Iterator for AsteroidShooter {
+    type Item = (i64, i64);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.asteroids.is_empty() {
+            return None;
+        }
+
+        let (angle, _, coord) = self.asteroids.remove(0);
+
+        if self.asteroids.iter().any(|(a, _, _)| *a != angle) {
+            while let Some((a, _, _)) = self.asteroids.get(0) {
+                if angle != *a {
+                    break;
+                }
+                self.asteroids.rotate_left(1);
+            }
+        }
+
+        Some(coord)
+    }
+}
+
+//
 // solution
 //
 
@@ -69,10 +124,22 @@ fn best_asteroid(asteroids: &[Complex<f64>]) -> (Complex<f64>, usize) {
         .unwrap()
 }
 
+fn asteroid_shootout(asteroids: &[Complex<f64>], n: usize) -> i64 {
+    if let Some((y, x)) = AsteroidShooter::new(asteroids).nth(n-1) {
+        x * 100 + y
+    }
+    else {
+        panic!("Target #{} not found", n)
+    }
+}
+
 pub fn day10a(input: &Input) -> usize {
     best_asteroid(&input.0).1
 }
 
+pub fn day10b(input: &Input) -> i64 {
+    asteroid_shootout(&input.0, 200)
+}
 
 //
 // tests
@@ -170,9 +237,45 @@ mod test {
     }
 
     #[test]
+    fn test_10_ex6() -> Result<(), Box<dyn Error>> {
+        let input = ".#..##.###...#######\n\
+                     ##.############..##.\n\
+                     .#.######.########.#\n\
+                     .###.#######.####.#.\n\
+                     #####.##.#.##.###.##\n\
+                     ..#####..#.#########\n\
+                     ####################\n\
+                     #.####....###.#.#.##\n\
+                     ##.#################\n\
+                     #####.##.###..####..\n\
+                     ..######..##.#######\n\
+                     ####.##.####...##..#\n\
+                     .#####..#.######.###\n\
+                     ##...#.##########...\n\
+                     #.##########.#######\n\
+                     .####.#.###.###.#.##\n\
+                     ....##.##.###..#####\n\
+                     .#.#.###########.###\n\
+                     #.#.#.#####.####.###\n\
+                     ###.##.####.##.#..##\n".parse::<super::Input>()?;
+        assert_eq!(super::asteroid_shootout(&input.0, 1), 1112);
+        assert_eq!(super::asteroid_shootout(&input.0, 2), 1201);
+        assert_eq!(super::asteroid_shootout(&input.0, 3), 1202);
+        assert_eq!(super::asteroid_shootout(&input.0, 10), 1208);
+        assert_eq!(super::asteroid_shootout(&input.0, 20), 1600);
+        assert_eq!(super::asteroid_shootout(&input.0, 50), 1609);
+        assert_eq!(super::asteroid_shootout(&input.0, 199), 906);
+        assert_eq!(super::asteroid_shootout(&input.0, 200), 802);
+        assert_eq!(super::asteroid_shootout(&input.0, 201), 1009);
+        assert_eq!(super::asteroid_shootout(&input.0, 299), 1101);
+        Ok(())
+    }
+
+    #[test]
     fn test_10() -> Result<(), Box<dyn Error>> {
         let input = util::get_parsed::<super::Input>("input/day10.txt")?;
         assert_eq!(super::day10a(&input), 274);
+        assert_eq!(super::day10b(&input), 305);
         Ok(())
     }
 }
