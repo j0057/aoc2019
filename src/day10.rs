@@ -4,6 +4,8 @@ use std::f64::consts::PI;
 
 use num_complex::Complex;
 
+fn mdeg(rad: f64) -> i64 { (rad / 2.0 / PI * 360_000.0) as i64 }
+
 //
 // enum InputError
 //
@@ -50,22 +52,25 @@ impl AsRef<Input> for Input {
 // solution
 //
 
-fn best_asteroid(asteroids: &[Complex<f64>]) -> usize {
+fn asteroids_visible(asteroids: &[Complex<f64>], pos: &Complex<f64>) -> usize {
     asteroids
         .iter()
-        .map(|a| asteroids
-             .iter()
-             // f64 does not implement Eq or Hash, so can't compare them or just stick them into a HashSet -- so convert radians to millidegrees
-             .map(|b| ((b-a).to_polar().1 / PI * 180_000.0).round() as i64)
-             .collect::<HashSet<_>>()
-             .len())
-        .max()
-        .unwrap() as usize
+        .filter(|b| pos != *b)
+        .map(|b| mdeg((b-pos).to_polar().1))
+        .collect::<HashSet<_>>()
+        .len()
+}
+
+fn best_asteroid(asteroids: &[Complex<f64>]) -> (Complex<f64>, usize) {
+    asteroids
+        .iter()
+        .map(|a| (*a, asteroids_visible(asteroids, a)))
+        .max_by_key(|&(_, num_visible)| num_visible)
+        .unwrap()
 }
 
 pub fn day10a(input: &Input) -> usize {
-    best_asteroid(&input.0)
-
+    best_asteroid(&input.0).1
 }
 
 
