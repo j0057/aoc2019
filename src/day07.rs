@@ -13,9 +13,9 @@ pub fn day07a(vm: &intcode::VM) -> i128 {
                 let output = vm.run(&mut vec![phase, *state]);
                 *state = *output.last().unwrap();
                 Some(*state)
-            })
-            .last()
-            .unwrap()
+             })
+             .last()
+             .unwrap()
         )
         .max()
         .unwrap()
