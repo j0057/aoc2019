@@ -82,6 +82,10 @@ impl Body {
         self.pos.y += self.vel.y;
         self.pos.z += self.vel.z;
     }
+
+    fn xs(&self) -> [i64; 2] { [self.pos.x, self.vel.x] }
+    fn ys(&self) -> [i64; 2] { [self.pos.y, self.vel.y] }
+    fn zs(&self) -> [i64; 2] { [self.pos.z, self.vel.z] }
 }
 
 impl std::str::FromStr for Body {
@@ -105,6 +109,9 @@ impl std::fmt::Display for Body {
 //
 // solution
 //
+
+fn gcd(a: i64, b: i64) -> i64 { if b == 0 { a } else { gcd(b, a % b) } }
+fn lcm(a: i64, b: i64) -> i64 { (a * b).abs() / gcd(a, b) }
 
 fn step(bodies: &[RefCell<Body>]) {
     (0..bodies.len())
@@ -131,8 +138,38 @@ fn energy(bodies: &[Body], steps: i64) -> i64 {
         .sum()
 }
 
+fn find_periods(bodies: &[Body]) -> [i64; 3] {
+    let bodies = as_refcells(bodies);
+
+    let start_x = bodies.iter().map(|b| b.borrow().xs()).collect::<Vec<_>>();
+    let start_y = bodies.iter().map(|b| b.borrow().ys()).collect::<Vec<_>>();
+    let start_z = bodies.iter().map(|b| b.borrow().zs()).collect::<Vec<_>>();
+
+    let mut periods = [0; 3];
+
+    for n in 1.. {
+        if periods.iter().all(|&p| p != 0) {
+            break;
+        }
+
+        step(&bodies);
+
+        if periods[0] == 0 && start_x == bodies.iter().map(|b| b.borrow().xs()).collect::<Vec<_>>() { periods[0] = n; }
+        if periods[1] == 0 && start_y == bodies.iter().map(|b| b.borrow().ys()).collect::<Vec<_>>() { periods[1] = n; }
+        if periods[2] == 0 && start_z == bodies.iter().map(|b| b.borrow().zs()).collect::<Vec<_>>() { periods[2] = n; }
+
+    }
+
+    periods
+}
+
 pub fn day12a(bodies: &[Body]) -> i64 {
     energy(bodies, 1000)
+}
+
+pub fn day12b(bodies: &[Body]) -> i64 {
+    let periods = find_periods(bodies);
+    lcm(periods[0], lcm(periods[1], periods[2]))
 }
 
 //
@@ -173,9 +210,30 @@ mod test {
     }
 
     #[test]
+    fn test_12_ex3() -> Result<(), Box<dyn Error>> {
+        let input = parse::<super::Body>("<x=-1, y=0, z=2>\n\
+                                          <x=2, y=-10, z=-7>\n\
+                                          <x=4, y=-8, z=8>\n\
+                                          <x=3, y=5, z=-1>")?;
+        assert_eq!(super::day12b(&input), 2772);
+        Ok(())
+    }
+
+    #[test]
+    fn test_12_ex4() -> Result<(), Box<dyn Error>> {
+        let input = parse::<super::Body>("<x=-8, y=-10, z=0>\n\
+                                          <x=5, y=5, z=10>\n\
+                                          <x=2, y=-7, z=3>\n\
+                                          <x=9, y=-8, z=-3>")?;
+        assert_eq!(super::day12b(&input), 468_6774_924);
+        Ok(())
+    }
+
+    #[test]
     fn test_12() -> Result<(), Box<dyn Error>> {
         let input = util::get_parsed_lines::<super::Body>("input/day12.txt")?;
         assert_eq!(super::day12a(&input), 12773);
+        assert_eq!(super::day12b(&input), 306_798_770_391_636);
         Ok(())
     }
 }
