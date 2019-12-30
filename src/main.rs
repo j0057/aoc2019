@@ -102,6 +102,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         Some("11b") => { let input = util::get_parsed_line::<intcode::VM>("input/day11.txt")?;
                          day11::day11_main(&input)?; },
 
+        Some("13")  => { let input = util::get_parsed_line::<intcode::VM>("input/day13.txt")?;
+                         day13::day13_main(&input)?; },
+
         Some(_)     => (),
 
         None        => puzzles()?

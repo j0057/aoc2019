@@ -1,4 +1,8 @@
+use std::io::Write;
+use std::error::Error;
+
 use crate::intcode;
+use crate::csiseq;
 
 //
 // enum Tile -- represents the state of a tile
@@ -56,6 +60,8 @@ struct Game {
     vm: intcode::VM,
     out: Vec::<i128>,
     state: intcode::Status,
+    ball_x: Option<i128>,
+    paddle_x: Option<i128>,
 }
 
 impl Game {
@@ -64,6 +70,8 @@ impl Game {
             vm: vm.clone(),
             out: vec![],
             state: intcode::Status::Suspended,
+            ball_x: None,
+            paddle_x: None,
         }
     }
 }
@@ -77,11 +85,12 @@ impl Iterator for Game {
                 return None;
             }
 
+            let mut input = vec![];
             loop {
-                match self.vm.step(&mut vec![], &mut self.out) {
+                match self.vm.step(&mut input, &mut self.out) {
                     intcode::Status::Suspended  => { if self.out.len() >= 3 { break } },
                     intcode::Status::Halted     => { if self.out.len() >= 3 { break } else { return None } },
-                    intcode::Status::Blocked    => { panic!("Program is asking for input") },
+                    intcode::Status::Blocked    => { input.push((self.ball_x.unwrap_or(0) - self.paddle_x.unwrap_or(0)).signum()); },
                 }
             }
         }
@@ -90,12 +99,20 @@ impl Iterator for Game {
         let y = self.out.remove(0);
         let v = self.out.remove(0);
 
-        if x == -1 && y == 0 {
-            Some(Output::ScoreUpdate(v))
+        let result = if x == -1 && y == 0 {
+            Output::ScoreUpdate(v)
         }
         else {
-            Some(Output::TileUpdate(x, y, v.into()))
+            Output::TileUpdate(x, y, v.into())
+        };
+
+        match result {
+            Output::TileUpdate(x, _, Tile::Paddle) => self.paddle_x = Some(x),
+            Output::TileUpdate(x, _, Tile::Ball)   => self.ball_x = Some(x),
+            _                                      => (),
         }
+
+        Some(result)
     }
 }
 
@@ -110,6 +127,41 @@ pub fn day13a(vm: &intcode::VM) -> usize {
             _                                     => false
         })
         .count()
+}
+
+pub fn day13_main(vm: &intcode::VM) -> Result<(), Box<dyn Error>> {
+    let mut stdout = std::io::stdout();
+    let mut game = Game::new(vm);
+
+    game.vm.memory[0] = 2;
+
+    stdout.write_all(csiseq::CLEAR_SCREEN)?;
+    stdout.write_all(csiseq::HIDE_CURSOR)?;
+    stdout.flush()?;
+
+    for output in game {
+
+        match output {
+            Output::TileUpdate(x, y, v) => {
+                stdout.write_all(&csiseq::move_cursor((y+3) as i32, (x+4) as i32))?;
+                stdout.write_all(v.to_string().as_bytes())?;
+                stdout.flush()?;
+            },
+            Output::ScoreUpdate(s) => {
+                stdout.write_all(&csiseq::move_cursor(25, 6))?;
+                stdout.write_all(s.to_string().as_bytes())?;
+            }
+        }
+
+        std::thread::sleep(std::time::Duration::from_millis(6));
+    }
+
+    stdout.write_all(csiseq::SHOW_CURSOR)?;
+    stdout.write_all(&csiseq::move_cursor(25, 1))?;
+    stdout.write_all(&[10])?;
+    stdout.flush()?;
+
+    Ok(())
 }
 
 //
