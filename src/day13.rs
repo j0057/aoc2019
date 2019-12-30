@@ -129,6 +129,17 @@ pub fn day13a(vm: &intcode::VM) -> usize {
         .count()
 }
 
+pub fn day13b(vm: &intcode::VM) -> i128 {
+    let mut game = Game::new(vm);
+    game.vm.memory[0] = 2;
+    game.filter_map(|output| match output {
+        Output::ScoreUpdate(s) => Some(s),
+        _                      => None,
+    })
+    .last()
+    .unwrap()
+}
+
 pub fn day13_main(vm: &intcode::VM) -> Result<(), Box<dyn Error>> {
     let mut stdout = std::io::stdout();
     let mut game = Game::new(vm);
@@ -179,6 +190,7 @@ mod test {
     fn test_13() -> Result<(), Box<dyn Error>> {
         let vm = util::get_parsed_line::<intcode::VM>("input/day13.txt")?;
         assert_eq!(super::day13a(&vm), 344);
+        assert_eq!(super::day13b(&vm), 17336);
         Ok(())
     }
 }
