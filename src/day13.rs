@@ -39,6 +39,16 @@ impl std::fmt::Display for Tile {
 }
 
 //
+// enum Output -- represents an output instruction of the arcade program
+//
+
+#[derive(Debug)]
+enum Output {
+    TileUpdate(i128, i128, Tile),
+    ScoreUpdate(i128),
+}
+
+//
 // struct Game -- represents the state of the game including whatever it is the arcade program does
 //
 
@@ -59,7 +69,7 @@ impl Game {
 }
 
 impl Iterator for Game {
-    type Item = (i128, i128, Tile);
+    type Item = Output;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.out.len() < 3 {
@@ -76,7 +86,16 @@ impl Iterator for Game {
             }
         }
 
-        Some((self.out.remove(0), self.out.remove(0), self.out.remove(0).into()))
+        let x = self.out.remove(0);
+        let y = self.out.remove(0);
+        let v = self.out.remove(0);
+
+        if x == -1 && y == 0 {
+            Some(Output::ScoreUpdate(v))
+        }
+        else {
+            Some(Output::TileUpdate(x, y, v.into()))
+        }
     }
 }
 
@@ -86,7 +105,10 @@ impl Iterator for Game {
 
 pub fn day13a(vm: &intcode::VM) -> usize {
     Game::new(vm)
-        .filter(|(_, _, tile)| *tile == Tile::Block)
+        .filter(|output| match *output {
+            Output::TileUpdate(_, _, Tile::Block) => true,
+            _                                     => false
+        })
         .count()
 }
 
