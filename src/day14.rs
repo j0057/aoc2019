@@ -81,7 +81,7 @@ mod test {
                                        7 A, 1 B => 1 C\n\
                                        7 A, 1 C => 1 D\n\
                                        7 A, 1 D => 1 E\n\
-                                       & A, 1 E => 1 FUEL")?;
+                                       7 A, 1 E => 1 FUEL")?;
         assert_eq!(input[0], super::Reaction { precursors: vec![super::Reagent { amount: 10, name: "ORE".to_owned() }],
                                                product: super::Reagent { amount: 10, name: "A".to_owned() } });
         Ok(())
