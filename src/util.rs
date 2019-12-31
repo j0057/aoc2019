@@ -41,3 +41,10 @@ pub fn get_parsed_line<T: FromStr>(filename: &str) -> Result<T, Box<dyn Error>> 
     let result = get_line(filename)?.parse()?;
     Ok(result)
 }
+
+#[cfg(test)]
+pub fn parse_lines<T: std::str::FromStr>(text: &str) -> Result<Vec<T>, T::Err> {
+    text.split('\n')
+        .map(|line| line.parse::<T>())
+        .collect::<Result<Vec<T>, T::Err>>()
+}

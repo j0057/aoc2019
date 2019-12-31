@@ -182,49 +182,42 @@ mod test {
 
     use crate::util;
 
-    fn parse<T: std::str::FromStr>(input: &str) -> Result<Vec<T>, T::Err> {
-        input
-            .split('\n')
-            .map(|line| line.parse::<T>())
-            .collect::<Result<Vec<T>, T::Err>>()
-    }
-
     #[test]
     fn test_12_ex1() -> Result<(), Box<dyn Error>> {
-        let input = parse::<super::Body>("<x=-1, y=0, z=2>\n\
-                                          <x=2, y=-10, z=-7>\n\
-                                          <x=4, y=-8, z=8>\n\
-                                          <x=3, y=5, z=-1>")?;
+        let input = util::parse_lines("<x=-1, y=0, z=2>\n\
+                                      <x=2, y=-10, z=-7>\n\
+                                      <x=4, y=-8, z=8>\n\
+                                      <x=3, y=5, z=-1>")?;
         assert_eq!(super::energy(&input, 10), 179);
         Ok(())
     }
 
     #[test]
     fn test_12_ex2() -> Result<(), Box<dyn Error>> {
-        let input = parse::<super::Body>("<x=-8, y=-10, z=0>\n\
-                                          <x=5, y=5, z=10>\n\
-                                          <x=2, y=-7, z=3>\n\
-                                          <x=9, y=-8, z=-3>")?;
+        let input = util::parse_lines("<x=-8, y=-10, z=0>\n\
+                                       <x=5, y=5, z=10>\n\
+                                       <x=2, y=-7, z=3>\n\
+                                       <x=9, y=-8, z=-3>")?;
         assert_eq!(super::energy(&input, 100), 1940);
         Ok(())
     }
 
     #[test]
     fn test_12_ex3() -> Result<(), Box<dyn Error>> {
-        let input = parse::<super::Body>("<x=-1, y=0, z=2>\n\
-                                          <x=2, y=-10, z=-7>\n\
-                                          <x=4, y=-8, z=8>\n\
-                                          <x=3, y=5, z=-1>")?;
+        let input = util::parse_lines("<x=-1, y=0, z=2>\n\
+                                       <x=2, y=-10, z=-7>\n\
+                                       <x=4, y=-8, z=8>\n\
+                                       <x=3, y=5, z=-1>")?;
         assert_eq!(super::day12b(&input), 2772);
         Ok(())
     }
 
     #[test]
     fn test_12_ex4() -> Result<(), Box<dyn Error>> {
-        let input = parse::<super::Body>("<x=-8, y=-10, z=0>\n\
-                                          <x=5, y=5, z=10>\n\
-                                          <x=2, y=-7, z=3>\n\
-                                          <x=9, y=-8, z=-3>")?;
+        let input = util::parse_lines("<x=-8, y=-10, z=0>\n\
+                                       <x=5, y=5, z=10>\n\
+                                       <x=2, y=-7, z=3>\n\
+                                       <x=9, y=-8, z=-3>")?;
         assert_eq!(super::day12b(&input), 468_6774_924);
         Ok(())
     }
