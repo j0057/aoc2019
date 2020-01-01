@@ -88,6 +88,8 @@ fn puzzles() -> Result<(), Box<dyn Error>> {
     puzzle(13, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day13::day13a))?;
     puzzle(13, 'b', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day13::day13b))?;
 
+    puzzle(14, 'a', Box::new(util::get_parsed_lines::<day14::Reaction>), Box::new(day14::day14a))?;
+
     println!("--- --------------- ---------------");
 
     Ok(())
