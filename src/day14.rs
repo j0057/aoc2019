@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::collections::HashMap;
 
 //
@@ -123,6 +124,22 @@ impl<'a> Reactor<'a> {
             })
             .sum()
     }
+
+    fn max_fuel(&mut self, ore: i64) -> i64 {
+        let mut min_fuel = 0;
+        let mut max_fuel = ore;
+        while max_fuel - min_fuel > 1 {
+            self.surplus.clear();
+            let x = (min_fuel + max_fuel) / 2;
+            let o = self.ore_cost(x, "FUEL");
+            match o.cmp(&ore) {
+                Ordering::Equal   => { return x }
+                Ordering::Less    => { min_fuel = x }
+                Ordering::Greater => { max_fuel = x }
+            }
+        }
+        min_fuel
+    }
 }
 
 //
@@ -131,6 +148,10 @@ impl<'a> Reactor<'a> {
 
 pub fn day14a(reactions: &[Reaction]) -> i64 {
     Reactor::new(reactions).ore_cost(1, "FUEL")
+}
+
+pub fn day14b(reactions: &[Reaction]) -> i64 {
+    Reactor::new(reactions).max_fuel(1_000_000_000_000)
 }
 
 //
@@ -238,9 +259,32 @@ mod test {
     }
 
     #[test]
+    fn test_14_ex6() -> Result<(), Box<dyn Error>> {
+        let input = util::parse_lines(EX3)?;
+        println!("WTF ### {}", super::Reactor::new(&input).ore_cost(82_892_753, "FUEL")); // 999_999_999_076
+        assert_eq!(super::day14b(&input), 82_892_753);
+        Ok(())
+    }
+
+    #[test]
+    fn test_14_ex7() -> Result<(), Box<dyn Error>> {
+        let input = util::parse_lines(EX4)?;
+        assert_eq!(super::day14b(&input), 5_586_022);
+        Ok(())
+    }
+
+    #[test]
+    fn test_14_ex8() -> Result<(), Box<dyn Error>> {
+        let input = util::parse_lines(EX5)?;
+        assert_eq!(super::day14b(&input), 460_664);
+        Ok(())
+    }
+
+    #[test]
     fn test_14() -> Result<(), Box<dyn Error>> {
         let input = util::get_parsed_lines("input/day14.txt")?;
         assert_eq!(super::day14a(&input), 220_019);
+        assert_eq!(super::day14b(&input), 5_650_230);
         Ok(())
     }
 }
