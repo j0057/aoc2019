@@ -17,8 +17,14 @@ pub enum InputError {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Reagent {
-    amount: i64,
+    quantity: i64,
     name: String
+}
+
+impl Reagent {
+    fn new(qty: i64, name: &str) -> Self {
+        Self { quantity: qty, name: name.into() }
+    }
 }
 
 impl std::str::FromStr for Reagent {
@@ -29,10 +35,7 @@ impl std::str::FromStr for Reagent {
         if parts.len() != 2 {
             return Err(InputError::Parse(Some(text.to_owned())));
         }
-        let result = Reagent {
-            amount: parts[0].parse()?,
-            name: parts[1].to_owned()
-        };
+        let result = Reagent::new(parts[0].parse()?, parts[1]);
         Ok(result)
     }
 }
@@ -47,6 +50,12 @@ pub struct Reaction {
     product: Reagent,
 }
 
+impl Reaction {
+    fn new(precursors: Vec<Reagent>, product: Reagent) -> Self {
+        Self { precursors, product }
+    }
+}
+
 impl std::str::FromStr for Reaction {
     type Err = InputError;
 
@@ -55,10 +64,12 @@ impl std::str::FromStr for Reaction {
         if parts.len() != 2 {
             return Err(InputError::Parse(Some(text.to_owned())));
         }
-        let result = Reaction {
-            precursors: parts[0].split(", ").map(|s| s.parse::<Reagent>()).collect::<Result<Vec<Reagent>, InputError>>()?,
-            product: parts[1].parse::<Reagent>()?,
-        };
+        let result = Reaction::new(
+            parts[0]
+                .split(", ")
+                .map(|s| s.parse::<Reagent>())
+                .collect::<Result<Vec<Reagent>, InputError>>()?,
+            parts[1].parse::<Reagent>()?);
         Ok(result)
     }
 }
