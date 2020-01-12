@@ -16,6 +16,7 @@ mod day11;
 mod day12;
 mod day13;
 mod day14;
+mod day15;
 
 extern crate itertools;
 extern crate num_complex;
@@ -23,6 +24,8 @@ extern crate permutohedron;
 extern crate bytecount;
 extern crate thiserror;
 extern crate regex;
+
+#[macro_use] extern crate lazy_static;
 
 use std::fmt::Display;
 use std::error::Error;
@@ -92,6 +95,8 @@ fn puzzles() -> Result<(), Box<dyn Error>> {
     puzzle(14, 'a', Box::new(util::get_parsed_lines::<day14::Reaction>), Box::new(day14::day14a))?;
     puzzle(14, 'b', Box::new(util::get_parsed_lines::<day14::Reaction>), Box::new(day14::day14b))?;
 
+    puzzle(15, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day15::day15a))?;
+
     println!("--- --------------- ---------------");
 
     Ok(())
@@ -116,6 +121,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         Some("13")  => { let input = util::get_parsed_line::<intcode::VM>("input/day13.txt")?;
                          day13::day13_main(&input)?; },
+
+        Some("15")  => { let input = util::get_parsed_line::<intcode::VM>("input/day15.txt")?;
+                         day15::day15_main(&input)?; },
 
         Some(x)     => { return Err(ArgumentError::BadArgument(x.to_owned()).into()); },
 
