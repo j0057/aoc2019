@@ -18,6 +18,15 @@ enum Tile {
     Target,
 }
 
+impl Tile {
+    fn is_unknown(&self) -> bool {
+        match *self {
+            Tile::Unknown => true,
+            _             => false,
+        }
+    }
+}
+
 impl std::fmt::Display for Tile {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", match *self {
@@ -104,48 +113,21 @@ impl Grid {
             .collect()
     }
 
-    fn find_reachable_unknowns(&self) -> HashSet<Coord> {
-        self.grid
-            .iter()
-            .filter(|(_, t)| **t == Tile::Floor || **t == Tile::Target)
-            .flat_map(|(c, _)| self.find_adjacent(&c, &Tile::Unknown))
-            .collect()
-    }
-
-    // https://en.wikipedia.org/wiki/Breadth-first_search
     fn bfs(&self, src: &Coord, tgt: &Coord) -> Vec<Coord> {
-        let mut queue = VecDeque::<Coord>::new();
-        let mut parents = HashMap::<Coord, Option<Coord>>::new();
-
-        queue.push_back(src.clone());
-        parents.insert(src.clone(), None);
-
-        while let Some(v) = queue.pop_front() {
-            if v == *tgt {
-                return successors(Some(v), |x| *parents.get(x)?).collect::<Vec<_>>();
-            }
-
-            if let Tile::Unknown = self.grid.get(&v).unwrap_or(&Tile::Unknown) {
-                continue;
-            }
-
-            for k in &[Tile::Unknown, Tile::Floor, Tile::Target] {
-                for w in self.find_adjacent(&v, k) {
-                    if ! parents.contains_key(&w) {
-                        parents.insert(w, Some(v));
-                        queue.push_back(w);
-                    }
-                }
-            }
-        }
-        unreachable!()
+        self.iter_routes(src)
+            .filter(|route| route[0] == *tgt)
+            .nth(0)
+            .unwrap()
     }
 
     fn path_to_closest_unknown(&self, pos: &Coord) -> Option<Vec<Coord>> {
-        self.find_reachable_unknowns()
-            .iter()
-            .map(|tgt| self.bfs(pos, &tgt))
-            .min_by_key(|path| path.len())
+        self.iter_routes(pos)
+            .filter(|route| self[*route.first().unwrap()] == Tile::Unknown)
+            .nth(0)
+    }
+
+    fn iter_routes(&self, src: &Coord) -> RouteIter {
+        RouteIter::new(&self, &src)
     }
 }
 
@@ -184,6 +166,53 @@ impl std::fmt::Display for Grid {
             write!(f, "\n")?;
         }
         Ok(())
+    }
+}
+
+//
+// struct RouteIter
+//
+
+#[derive(Debug)]
+struct RouteIter<'a> {
+    grid: &'a Grid,
+    queue: VecDeque<Coord>,
+    parents: HashMap<Coord, Option<Coord>>,
+}
+
+impl<'a> RouteIter<'a> {
+    fn new(grid: &'a Grid, pos: &Coord) -> Self {
+        let mut result = Self {
+            grid: grid,
+            queue: VecDeque::new(),
+            parents: HashMap::new(),
+        };
+        result.queue.push_back(pos.clone());
+        result.parents.insert(pos.clone(), None);
+        result
+    }
+}
+
+impl Iterator for RouteIter<'_> {
+    type Item = Vec<Coord>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(v) = self.queue.pop_front() {
+            if ! self.grid[v].is_unknown() {
+                for k in &[Tile::Unknown, Tile::Floor, Tile::Target] {
+                    for w in self.grid.find_adjacent(&v, k) {
+                        if self.parents.contains_key(&w) {
+                            continue;
+                        }
+                        self.parents.insert(w, Some(v));
+                        self.queue.push_back(w);
+                    }
+                }
+            }
+            let path = successors(Some(v), |x| *self.parents.get(x)?).collect();
+            return Some(path);
+        }
+        None
     }
 }
 
@@ -311,17 +340,6 @@ mod test {
         grid[Coord::new(0, 1)] = Tile::Floor;
         let unknowns = grid.find_adjacent(&Coord::new(0, 1), &Tile::Unknown);
         assert_eq!(unknowns, [(-1, 1), (0, 2), (1, 1)]
-                               .iter()
-                               .map(|&(x, y)| Coord::new(x, y))
-                               .collect::<HashSet<Coord>>());
-    }
-
-    #[test]
-    fn test_15_grid_3() {
-        let mut grid = Grid::new();
-        grid[Coord::new(0, 0)] = Tile::Floor;
-        let unknowns = grid.find_reachable_unknowns();
-        assert_eq!(unknowns, [(0, -1), (0, 1), (-1, 0), (1, 0)]
                                .iter()
                                .map(|&(x, y)| Coord::new(x, y))
                                .collect::<HashSet<Coord>>());
