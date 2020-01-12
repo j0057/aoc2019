@@ -97,6 +97,12 @@ fn puzzles() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+#[derive(Debug, thiserror::Error)]
+enum ArgumentError {
+    #[error("Argument not understood: {0:?}")]
+    BadArgument(String)
+}
+
 fn main() -> Result<(), Box<dyn Error>> {
     let arg = std::env::args().skip(1).nth(0);
 
@@ -111,7 +117,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         Some("13")  => { let input = util::get_parsed_line::<intcode::VM>("input/day13.txt")?;
                          day13::day13_main(&input)?; },
 
-        Some(_)     => (),
+        Some(x)     => { return Err(ArgumentError::BadArgument(x.to_owned()).into()); },
 
         None        => puzzles()?
     };
