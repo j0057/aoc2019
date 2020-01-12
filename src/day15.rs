@@ -294,6 +294,16 @@ pub fn day15a(vm: &intcode::VM) -> i32 {
     droid.grid.bfs(&Coord::new(0, 0), &droid.target.unwrap()).len() as i32 - 1
 }
 
+pub fn day15b(vm: &intcode::VM) -> i32 {
+    let mut droid = RepairDroid::new(vm);
+    for _ in &mut droid { }
+    droid.grid
+        .iter_routes(&droid.target.unwrap())
+        .max_by_key(|route| route.len())
+        .unwrap()
+        .len() as i32 - 1
+}
+
 pub fn day15_main(vm: &intcode::VM) -> Result<(), Error> {
     let mut droid = RepairDroid::new(vm);
     let mut stdout = std::io::stdout();
@@ -384,6 +394,7 @@ mod test {
     fn test_15() -> Result<(), Box<dyn std::error::Error>> {
         let input = util::get_parsed_line::<intcode::VM>("input/day15.txt")?;
         assert_eq!(day15a(&input), 330);
+        assert_eq!(day15b(&input), 352);
         Ok(())
     }
 }
