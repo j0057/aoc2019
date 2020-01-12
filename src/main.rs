@@ -22,6 +22,7 @@ extern crate num_complex;
 extern crate permutohedron;
 extern crate bytecount;
 extern crate thiserror;
+extern crate regex;
 
 use std::fmt::Display;
 use std::error::Error;
