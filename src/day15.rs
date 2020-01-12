@@ -62,7 +62,7 @@ impl BBox {
         }
     }
 
-    fn extend(&mut self, c: &Coord) {
+    fn extend(&mut self, c: Coord) {
         self.min_x = std::cmp::min(self.min_x, c.re);
         self.min_y = std::cmp::min(self.min_y, c.im);
         self.max_x = std::cmp::max(self.max_x, c.re);
@@ -104,7 +104,7 @@ impl Grid {
         }
     }
 
-    fn find_adjacent(&self, coord: &Coord, kind: &Tile) -> HashSet<Coord> {
+    fn find_adjacent(&self, coord: Coord, kind: &Tile) -> HashSet<Coord> {
         DIRECTIONS
             .keys()
             .map(|d| coord + d)
@@ -113,21 +113,21 @@ impl Grid {
             .collect()
     }
 
-    fn bfs(&self, src: &Coord, tgt: &Coord) -> Vec<Coord> {
+    fn bfs(&self, src: Coord, tgt: Coord) -> Vec<Coord> {
         self.iter_routes(src)
-            .filter(|route| route[0] == *tgt)
+            .filter(|route| route[0] == tgt)
             .nth(0)
             .unwrap()
     }
 
-    fn path_to_closest_unknown(&self, pos: &Coord) -> Option<Vec<Coord>> {
+    fn path_to_closest_unknown(&self, pos: Coord) -> Option<Vec<Coord>> {
         self.iter_routes(pos)
             .filter(|route| self[*route.first().unwrap()] == Tile::Unknown)
             .nth(0)
     }
 
-    fn iter_routes(&self, src: &Coord) -> RouteIter {
-        RouteIter::new(&self, &src)
+    fn iter_routes(&self, src: Coord) -> RouteIter {
+        RouteIter::new(&self, src)
     }
 }
 
@@ -141,7 +141,7 @@ impl std::ops::Index<Coord> for Grid {
 
 impl std::ops::IndexMut<Coord> for Grid {
     fn index_mut(&mut self, idx: Coord) -> &mut Tile {
-        self.bbox.extend(&idx);
+        self.bbox.extend(idx);
         self.grid.entry(idx).or_insert(Tile::Unknown)
     }
 }
@@ -163,7 +163,7 @@ impl std::fmt::Display for Grid {
             if y == self.bbox.min_y {
                 write!(f, "    X: {} {}, Y: {} {}", self.bbox.min_x, self.bbox.max_x, self.bbox.min_y, self.bbox.max_y)?;
             }
-            write!(f, "\n")?;
+            writeln!(f)?;
         }
         Ok(())
     }
@@ -181,14 +181,14 @@ struct RouteIter<'a> {
 }
 
 impl<'a> RouteIter<'a> {
-    fn new(grid: &'a Grid, pos: &Coord) -> Self {
+    fn new(grid: &'a Grid, pos: Coord) -> Self {
         let mut result = Self {
-            grid: grid,
+            grid,
             queue: VecDeque::new(),
             parents: HashMap::new(),
         };
-        result.queue.push_back(pos.clone());
-        result.parents.insert(pos.clone(), None);
+        result.queue.push_back(pos);
+        result.parents.insert(pos, None);
         result
     }
 }
@@ -200,7 +200,7 @@ impl Iterator for RouteIter<'_> {
         if let Some(v) = self.queue.pop_front() {
             if ! self.grid[v].is_unknown() {
                 for k in &[Tile::Unknown, Tile::Floor, Tile::Target] {
-                    for w in self.grid.find_adjacent(&v, k) {
+                    for w in self.grid.find_adjacent(v, k) {
                         if self.parents.contains_key(&w) {
                             continue;
                         }
@@ -252,7 +252,7 @@ impl Iterator for RepairDroid {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.plan.is_empty() {
-            self.plan = match self.grid.path_to_closest_unknown(&self.grid.pos) {
+            self.plan = match self.grid.path_to_closest_unknown(self.grid.pos) {
                 Some(x) => { x }
                 None    => { return None }
             };
@@ -291,14 +291,14 @@ impl Iterator for RepairDroid {
 pub fn day15a(vm: &intcode::VM) -> i32 {
     let mut droid = RepairDroid::new(vm);
     for _ in &mut droid { }
-    droid.grid.bfs(&Coord::new(0, 0), &droid.target.unwrap()).len() as i32 - 1
+    droid.grid.bfs(Coord::new(0, 0), droid.target.unwrap()).len() as i32 - 1
 }
 
 pub fn day15b(vm: &intcode::VM) -> i32 {
     let mut droid = RepairDroid::new(vm);
     for _ in &mut droid { }
     droid.grid
-        .iter_routes(&droid.target.unwrap())
+        .iter_routes(droid.target.unwrap())
         .max_by_key(|route| route.len())
         .unwrap()
         .len() as i32 - 1
@@ -316,7 +316,7 @@ pub fn day15_main(vm: &intcode::VM) -> Result<(), Error> {
         std::thread::sleep(std::time::Duration::from_millis(25));
     }
     match droid.target {
-        Some(x) => stdout.write_all(&(droid.grid.bfs(&Coord::new(0, 0), &x).len()-1).to_string().bytes().collect::<Vec<_>>())?,
+        Some(x) => stdout.write_all(&(droid.grid.bfs(Coord::new(0, 0), x).len()-1).to_string().bytes().collect::<Vec<_>>())?,
         None    => stdout.write_all(b"Oxygen system not found :-(")?,
     }
     stdout.write_all(&csiseq::SHOW_CURSOR)?;
@@ -332,7 +332,7 @@ mod test {
     #[test]
     fn test_15_bbox_1() {
         let mut bbox = BBox { min_x: 0, min_y: 0, max_x: 0, max_y: 0 };
-        bbox.extend(&Coord::new(13, 0));
+        bbox.extend(Coord::new(13, 0));
         assert_eq!(bbox.max_x, 13);
     }
 
@@ -348,7 +348,7 @@ mod test {
         let mut grid = Grid::new();
         grid[Coord::new(0, 0)] = Tile::Floor;
         grid[Coord::new(0, 1)] = Tile::Floor;
-        let unknowns = grid.find_adjacent(&Coord::new(0, 1), &Tile::Unknown);
+        let unknowns = grid.find_adjacent(Coord::new(0, 1), &Tile::Unknown);
         assert_eq!(unknowns, [(-1, 1), (0, 2), (1, 1)]
                                .iter()
                                .map(|&(x, y)| Coord::new(x, y))
@@ -363,7 +363,7 @@ mod test {
         grid[Coord::new(-1, 2)] = Tile::Floor;
         grid[Coord::new( 0, 2)] = Tile::Floor;
         grid[Coord::new( 1, 2)] = Tile::Floor;
-        let path = grid.bfs(&Coord::new(0, 0), &Coord::new(2, 2));
+        let path = grid.bfs(Coord::new(0, 0), Coord::new(2, 2));
         assert_eq!(&path, &[(2, 2), (1, 2), (0, 2), (0, 1), (0, 0)]
                                .iter()
                                .map(|&(x, y)| Coord::new(x, y))
@@ -382,7 +382,7 @@ mod test {
         grid[Coord::new(0, 6)] = Tile::Wall; grid[Coord::new(1, 6)] = Tile::Floor; grid[Coord::new(2, 6)] = Tile::Unknown;
         grid[Coord::new(0, 7)] = Tile::Wall; grid[Coord::new(1, 7)] = Tile::Wall;  grid[Coord::new(2, 7)] = Tile::Wall;
 
-        let path = grid.path_to_closest_unknown(&Coord::new(1, 3)).unwrap();
+        let path = grid.path_to_closest_unknown(Coord::new(1, 3)).unwrap();
 
         assert_eq!(&path, &[(2, 1), (1, 1), (1, 2), (1, 3)]
                                .iter()
