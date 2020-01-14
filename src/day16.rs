@@ -56,6 +56,24 @@ pub fn day16a(input: &FFT) -> i64 {
     input.clone().nth(100).unwrap().iter().take(8).fold(0, |n, &d| 10 * n + d)
 }
 
+// https://www.reddit.com/r/adventofcode/comments/ebai4g/2019_day_16_solutions/fb3kujj/ ...
+pub fn day16b(input: &FFT) -> i64 {
+    let offset = input.state.iter().take(7).fold(0, |n, &d| 10 * n + d) as usize;
+    let suffix_len = input.state.len() * 10_000 - offset;
+    let mut suffix = input.state.iter().copied().rev().cycle().take(suffix_len).collect::<Vec<_>>();
+
+    for _ in 0..100 {
+        let mut prev = suffix[0];
+        for x in &mut suffix[1..] {
+            *x += prev;
+            *x %= 10;
+            prev = *x;
+        }
+    }
+
+    suffix.iter().rev().take(8).fold(0, |n, &d| 10 * n + d)
+}
+
 #[cfg(test)]
 mod test {
     use crate::util;
@@ -83,6 +101,7 @@ mod test {
     fn test_16() -> Result<(), Box<dyn std::error::Error>> {
         let input = util::get_parsed_line::<super::FFT>("input/day16.txt")?;
         assert_eq!(super::day16a(&input), 94935919);
+        assert_eq!(super::day16b(&input), 24158285);
         Ok(())
     }
 }
