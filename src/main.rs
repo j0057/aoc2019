@@ -18,6 +18,7 @@ mod day13;
 mod day14;
 mod day15;
 mod day16;
+mod day17;
 
 extern crate itertools;
 extern crate num_complex;
@@ -102,6 +103,8 @@ fn puzzles() -> Result<(), Box<dyn Error>> {
     puzzle(16, 'a', Box::new(util::get_parsed_line::<day16::FFT>), Box::new(day16::day16a))?;
     puzzle(16, 'b', Box::new(util::get_parsed_line::<day16::FFT>), Box::new(day16::day16b))?;
 
+    puzzle(17, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day17::day17a))?;
+
     println!("--- --------------- ---------------");
 
     Ok(())
@@ -129,6 +132,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         Some("15")  => { let input = util::get_parsed_line::<intcode::VM>("input/day15.txt")?;
                          day15::day15_main(&input)?; },
+
+        Some("17")  => { let input = util::get_parsed_line::<intcode::VM>("input/day17.txt")?;
+                         day17::day17_main(&input)?; },
 
         Some(x)     => { return Err(ArgumentError::BadArgument(x.to_owned()).into()); },
 
