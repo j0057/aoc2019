@@ -137,6 +137,28 @@ impl Iterator for Walker<'_> {
 // solution
 //
 
+fn compressed(steps: &[Action]) -> Vec<Action> {
+    let mut result = Vec::<Action>::new();
+    for step in steps {
+        match step {
+            Action::TurnLeft             => { result.push(*step) }
+            Action::TurnRight            => { result.push(*step) }
+            Action::MoveForward(Some(_)) => { panic!("unexpected {:?}", step) }
+            Action::MoveForward(None)    => {
+                match result.last_mut() {
+                    None       => { result.push(Action::MoveForward(Some(1))) }
+                    Some(last) => { match *last {
+                        Action::MoveForward(Some(i)) => { *last = Action::MoveForward(Some(i + 1)) }
+                        Action::MoveForward(None)    => { panic!("unexpected {:?}", *last) }
+                        _                            => { result.push(Action::MoveForward(Some(1))) }
+                    } }
+                }
+            }
+        }
+    }
+    result
+}
+
 fn display_list<T: std::fmt::Display>(list: &[T]) -> String {
     list.iter().map(|item| item.to_string()).collect::<Vec<_>>().join(",")
 }
@@ -154,12 +176,13 @@ pub fn day17_main(vm: &intcode::VM) -> Result<(), Box<dyn std::error::Error>> {
     let robot = CleaningRobot::new(&bytes);
     let answer = robot.alignment_parameter();
     let route = robot.walk().collect::<Vec<Action>>();
+    let prog = compressed(&route);
 
     let mut stdout = std::io::stdout();
     stdout.write_all(&bytes)?;
     writeln!(stdout, "*** ROBOT START: POSITION={} DIRECTION={}", robot.pos, robot.dir)?;
     writeln!(stdout, "*** ALIGNMENT PARAMETER: {}", answer)?;
-    writeln!(stdout, "*** RAW ROUTE: {}", display_list(&route))?;
+    writeln!(stdout, "*** PROGRAM: {}", display_list(&prog))?;
     Ok(())
 }
 
