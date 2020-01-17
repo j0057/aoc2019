@@ -6,6 +6,10 @@ use num_complex::Complex;
 
 use crate::intcode;
 
+//
+// type definitions and constants
+//
+
 type Coord = Complex<i32>;
 
 static UP: Coord = Coord { re: 0, im: -1 };
@@ -13,40 +17,73 @@ static DN: Coord = Coord { re: 0, im: 1 };
 static LT: Coord = Coord { re: -1, im: 0 };
 static RT: Coord = Coord { re: 1, im: 0 };
 
-fn get_scaffold(data: &[i128]) -> HashSet<Coord> {
-    data.split(|&b| b == 10)
-        .enumerate()
-        .flat_map(|(y, row)| row
-              .iter()
-              .enumerate()
-              .filter(|&(_, ch)| *ch != 46)
-              .map(move |(x, _)| Coord::new(x as i32, y as i32)))
-        .collect()
+//
+// struct CleaningRobot
+//
+
+#[derive(Debug, Default)]
+struct CleaningRobot {
+    scaffold: HashSet<Coord>,
+    pos: Coord,
+    dir: Coord,
 }
 
-fn get_alignment_params(scaffold: &HashSet<Coord>) -> i32 {
-    scaffold
-        .iter()
-        .filter(|&a| [UP, DN, LT, RT].iter().all(|b| scaffold.contains(&(a + b))))
-        .map(|a| a.re * a.im)
-        .sum()
+impl CleaningRobot {
+    fn new(data: &[u8]) -> Self {
+        let mut robot = CleaningRobot::default();
+        for (y, row) in data.split(|&b| b == 10).enumerate() {
+            for (x, ch) in row.iter().enumerate() {
+                match *ch as char {
+                    '#' => { robot.scaffold.insert(Coord::new(x as i32, y as i32)); }
+                    '.' => {}
+                    '^' => { robot.scaffold.insert(Coord::new(x as i32, y as i32)); robot.pos = Coord::new(x as i32, y as i32); robot.dir = UP; }
+                    'v' => { robot.scaffold.insert(Coord::new(x as i32, y as i32)); robot.pos = Coord::new(x as i32, y as i32); robot.dir = DN; }
+                    '<' => { robot.scaffold.insert(Coord::new(x as i32, y as i32)); robot.pos = Coord::new(x as i32, y as i32); robot.dir = LT; }
+                    '>' => { robot.scaffold.insert(Coord::new(x as i32, y as i32)); robot.pos = Coord::new(x as i32, y as i32); robot.dir = RT; }
+                     _  => { panic!("unrecognized char: {:?}", *ch as char); }
+                }
+            }
+        }
+        robot
+    }
+
+    fn alignment_parameter(&self) -> i32 {
+        self.scaffold
+            .iter()
+            .filter(|&a| [UP, DN, LT, RT]
+                .iter()
+                .all(|b| self.scaffold.contains(&(a + b))))
+            .map(|a| a.re * a.im)
+            .sum()
+    }
 }
+
+//
+// solution
+//
 
 pub fn day17a(vm: &intcode::VM) -> i32 {
     let output = vm.clone().run(&mut vec![]);
-    let scaffold = get_scaffold(&output);
-    get_alignment_params(&scaffold)
+    let bytes = output.iter().map(|&w| w as u8).collect::<Vec<u8>>();
+    let robot = CleaningRobot::new(&bytes);
+    robot.alignment_parameter()
 }
 
 pub fn day17_main(vm: &intcode::VM) -> Result<(), Box<dyn std::error::Error>> {
     let output = vm.clone().run(&mut vec![]);
     let bytes = output.iter().map(|&w| w as u8).collect::<Vec<u8>>();
+    let robot = CleaningRobot::new(&bytes);
+    let answer = robot.alignment_parameter();
+
     let mut stdout = std::io::stdout();
     stdout.write_all(&bytes)?;
-    let answer = get_alignment_params(&get_scaffold(&output));
-    writeln!(stdout, "*** ALIGNMENT PARAMETER : {:?} ***", answer)?;
+    writeln!(stdout, "*** ALIGNMENT PARAMETER: {:?}", answer)?;
     Ok(())
 }
+
+//
+// tests
+//
 
 #[cfg(test)]
 mod test {
