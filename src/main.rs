@@ -104,6 +104,7 @@ fn puzzles() -> Result<(), Box<dyn Error>> {
     puzzle(16, 'b', Box::new(util::get_parsed_line::<day16::FFT>), Box::new(day16::day16b))?;
 
     puzzle(17, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day17::day17a))?;
+    puzzle(17, 'b', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day17::day17b))?;
 
     println!("--- --------------- ---------------");
 
