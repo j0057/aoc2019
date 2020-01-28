@@ -107,7 +107,9 @@ fn puzzles() -> Result<(), Box<dyn Error>> {
     puzzle(17, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day17::day17a))?;
     puzzle(17, 'b', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day17::day17b))?;
 
-    println!("--- ---------------- ---------------");
+    puzzle(18, 'a', Box::new(util::get_parsed::<day18::Maze>), Box::new(day18::day18a))?;
+
+    println!("--- --------------- ---------------");
 
     Ok(())
 }
@@ -137,6 +139,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         Some("17")  => { let input = util::get_parsed_line::<intcode::VM>("input/day17.txt")?;
                          day17::day17_main(&input)?; },
+
+        Some("18")  => { let input = util::get_parsed::<day18::Maze>("input/day18.txt")?;
+                         day18::day18_main(&input)?; },
 
         Some(x)     => { return Err(ArgumentError::BadArgument(x.to_owned()).into()); },
 
