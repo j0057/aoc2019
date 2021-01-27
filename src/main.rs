@@ -48,14 +48,14 @@ fn puzzle<T: AsRef<U>, U: ?Sized, A: Display>(
     let start = std::time::SystemTime::now();
     let answer = solve(input.as_ref());
     let ns = start.elapsed()?.as_nanos();
-    println!("{:>2}{} {:>15} {:>15}", day, part, format_thousands(ns), answer);
+    println!("{:>2}{} {:>16} {:>15}", day, part, format_thousands(ns), answer);
     Ok(())
 }
 
 fn puzzles() -> Result<(), Box<dyn Error>> {
-    println!("--- --------------- ---------------");
-    println!(" #    s  ms  μs  ns          answer           Advent of Code 2019, by j0057 🎄");
-    println!("--- --------------- ---------------");
+    println!("--- ---------------- ---------------");
+    println!(" #     s  ms  μs  ns          answer           Advent of Code 2019, by j0057 🎄");
+    println!("--- ---------------- ---------------");
 
     puzzle(1, 'a', Box::new(util::get_parsed_lines::<u32>), Box::new(day01::day01a))?;
     puzzle(1, 'b', Box::new(util::get_parsed_lines::<u32>), Box::new(day01::day01b))?;
@@ -106,7 +106,7 @@ fn puzzles() -> Result<(), Box<dyn Error>> {
     puzzle(17, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day17::day17a))?;
     puzzle(17, 'b', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day17::day17b))?;
 
-    println!("--- --------------- ---------------");
+    println!("--- ---------------- ---------------");
 
     Ok(())
 }
