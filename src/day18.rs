@@ -1,5 +1,5 @@
 use std::collections::{HashMap, BTreeSet, VecDeque};
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::io::Write;
 
 //
@@ -81,26 +81,35 @@ impl std::convert::From<Tile> for char {
 #[derive(Debug, Default)]
 pub struct Maze {
     grid: HashMap<Coord, Tile>,
-    start: Coord,
+    bots: [Coord; 4],
     keys: BTreeSet<u8>,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
-struct CacheEntry(Coord, BTreeSet<u8>);
+struct CacheEntry([Coord; 4], BTreeSet<u8>);
 
 impl Maze {
     fn new(grid: HashMap<Coord, Tile>) -> Self {
-        let start = Self::find_entrance(&grid);
+        let bots = Self::find_entrances(&grid);
         let keys = Self::find_keys(&grid);
         Self {
             grid,
-            start,
+            bots,
             keys
         }
     }
 
-    fn find_entrance(grid: &HashMap<Coord, Tile>) -> Coord {
-        *grid.iter().find(|&(_, t)| *t == Tile::Entrance).unwrap().0
+    fn find_entrances(grid: &HashMap<Coord, Tile>) -> [Coord; 4] {
+        grid.iter()
+            .filter_map(|(coord, tile)| match *tile {
+                Tile::Entrance => Some(*coord),
+                _              => None
+            })
+            .chain(std::iter::repeat(Coord(0, 0)))
+            .take(4)
+            .collect::<Vec<_>>()
+            .try_into()
+            .unwrap()
     }
 
     fn find_keys(grid: &HashMap<Coord, Tile>) -> BTreeSet<u8> {
@@ -114,6 +123,12 @@ impl Maze {
         BreadthFirstSearch::new(&self.grid, visited, source)
     }
 
+    fn array_replace(c: [Coord; 4], i: usize, t: Coord) -> [Coord; 4] {
+        let mut result = c.clone();
+        result[i] = t;
+        result
+    }
+
     fn hash_add(&self, visited: &BTreeSet<u8>, key_pos: &Coord) -> BTreeSet<u8> {
         let key = match self.grid.get(key_pos).unwrap() {
             Tile::Key(k) => *k,
@@ -125,21 +140,42 @@ impl Maze {
         result
     }
 
-    fn shortest_path(&self, source: Coord, visited: BTreeSet<u8>, cache: &mut HashMap<CacheEntry, u64>) -> u64 {
+    fn shortest_path(&self, source: [Coord; 4], visited: BTreeSet<u8>, cache: &mut HashMap<CacheEntry, u64>) -> u64 {
         if visited == self.keys {
             0
         }
         else {
             let entry = CacheEntry(source.clone(), visited.clone());
             if ! cache.contains_key(&entry) {
-                let len = self.search(&visited, source)
-                    .map(|(target, dist)| dist + self.shortest_path(target, self.hash_add(&visited, &target), cache))
+                let len = source
+                    .iter()
+                    .enumerate()
+                    .map(|(i, c)| (i, self.search(&visited, *c).collect::<Vec<_>>()))
+                    .filter(|(_, g)| ! g.is_empty())
+                    .flat_map(|(i, g)| g.into_iter().map(move |(t, d)| (i, t, d)))
+                    .map(|(i, t, d)| d + self.shortest_path(Self::array_replace(source, i, t), self.hash_add(&visited, &t), cache))
                     .min()
                     .unwrap();
                 cache.insert(entry.clone(), len);
             }
             *cache.get(&entry).unwrap()
         }
+    }
+
+    fn hack4(&self) -> Self {
+        let mut grid = self.grid.clone();
+
+        *grid.get_mut(&Coord(self.bots[0].0-1, self.bots[0].1-1)).unwrap() = Tile::Entrance;
+        *grid.get_mut(&Coord(self.bots[0].0  , self.bots[0].1-1)).unwrap() = Tile::Wall;
+        *grid.get_mut(&Coord(self.bots[0].0+1, self.bots[0].1-1)).unwrap() = Tile::Entrance;
+        *grid.get_mut(&Coord(self.bots[0].0-1, self.bots[0].1  )).unwrap() = Tile::Wall;
+        *grid.get_mut(&Coord(self.bots[0].0  , self.bots[0].1  )).unwrap() = Tile::Wall;
+        *grid.get_mut(&Coord(self.bots[0].0+1, self.bots[0].1  )).unwrap() = Tile::Wall;
+        *grid.get_mut(&Coord(self.bots[0].0-1, self.bots[0].1+1)).unwrap() = Tile::Entrance;
+        *grid.get_mut(&Coord(self.bots[0].0  , self.bots[0].1+1)).unwrap() = Tile::Wall;
+        *grid.get_mut(&Coord(self.bots[0].0+1, self.bots[0].1+1)).unwrap() = Tile::Entrance;
+
+        Self::new(grid)
     }
 }
 
@@ -199,6 +235,7 @@ impl Iterator for BreadthFirstSearch<'_> {
         while let Some(v) = self.queue.pop_front() {
             match self.grid.get(&v).unwrap() {
                 Tile::Key(k) if ! self.visited.contains(k)      => return Some((v, *self.distance.get(&v).unwrap())),
+                Tile::Wall                                      => continue,
                 _                                               => (),
             }
             for &w in v.neighbours().iter() {
@@ -224,7 +261,12 @@ impl Iterator for BreadthFirstSearch<'_> {
 //
 
 pub fn day18a(maze: &Maze) -> u64 {
-    maze.shortest_path(maze.start, BTreeSet::<u8>::new(), &mut HashMap::<_, _>::new())
+    maze.shortest_path(maze.bots, BTreeSet::<u8>::new(), &mut HashMap::<_, _>::new())
+}
+
+pub fn day18b(maze: &Maze) -> u64 {
+    let maze = maze.hack4();
+    maze.shortest_path(maze.bots, BTreeSet::<u8>::new(), &mut HashMap::<_, _>::new())
 }
 
 pub fn day18_main(maze: &Maze) -> Result<(), Box<dyn std::error::Error>> {
@@ -295,6 +337,40 @@ mod test {
                         ###A#B#C################\n\
                         ###g#h#i################\n\
                         ########################";
+
+    static EX6: &str = "#######\n\
+                        #a.#Cd#\n\
+                        ##...##\n\
+                        ##.@.##\n\
+                        ##...##\n\
+                        #cB#Ab#\n\
+                        #######";
+
+    static EX7: &str = "###############\n\
+                        #d.ABC.#.....a#\n\
+                        ######...######\n\
+                        ######.@.######\n\
+                        ######...######\n\
+                        #b.....#.....c#\n\
+                        ###############";
+
+    static EX8: &str = "#############\n\
+                        #DcBa.#.GhKl#\n\
+                        #.###...#I###\n\
+                        #e#d#.@.#j#k#\n\
+                        ###C#...###J#\n\
+                        #fEbA.#.FgHi#\n\
+                        #############";
+
+    static EX9: &str = "#############\n\
+                        #g#f.D#..h#l#\n\
+                        #F###e#E###.#\n\
+                        #dCba...BcIJ#\n\
+                        #####.@.#####\n\
+                        #nK.L...G...#\n\
+                        #M###N#H###.#\n\
+                        #o#m..#i#jk.#\n\
+                        #############";
 
     #[test]
     fn test_18_1() -> Result<(), Box<dyn std::error::Error>> {
@@ -370,10 +446,45 @@ mod test {
     }
 
     #[test]
+    fn test_18_6() -> Result<(), Box<dyn std::error::Error>> {
+        let maze = EX6.parse()?;
+        let result = day18b(&maze);
+        assert_eq!(result, 8);
+        Ok(())
+    }
+
+    #[test]
+    fn test_18_7() -> Result<(), Box<dyn std::error::Error>> {
+        let maze = EX7.parse()?;
+        let result = day18b(&maze);
+        assert_eq!(result, 24);
+        Ok(())
+    }
+
+    #[test]
+    fn test_18_8() -> Result<(), Box<dyn std::error::Error>> {
+        let maze = EX8.parse()?;
+        let result = day18b(&maze);
+        assert_eq!(result, 32);
+        Ok(())
+    }
+
+    #[test]
+    fn test_18_9() -> Result<(), Box<dyn std::error::Error>> {
+        let maze = EX9.parse()?;
+        let result = day18b(&maze);
+        assert_eq!(result, 72);
+        Ok(())
+    }
+
+
+    #[test]
     fn test_18() -> Result<(), Box<dyn std::error::Error>> {
         let maze = crate::util::get_parsed::<Maze>("input/day18.txt")?;
         let part1 = day18a(&maze);
+        let part2 = day18b(&maze);
         assert_eq!(part1, 5068);
+        assert_eq!(part2, 1966);
         Ok(())
     }
 }
