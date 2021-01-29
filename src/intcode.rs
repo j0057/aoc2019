@@ -47,15 +47,20 @@ impl VM {
         }
     }
 
-    pub fn run(&mut self, input: &mut Vec<i128>) -> Vec<i128> {
-        let mut output = vec![];
+    pub fn run_with(&mut self, input: &mut Vec<i128>, output: &mut Vec<i128>) {
         loop {
-            match self.step(input, &mut output) {
-                Status::Halted      => return output,
+            match self.step(input, output) {
+                Status::Halted      => break,
                 Status::Blocked     => panic!("program wants to read from empty input"),
                 Status::Suspended   => continue,
             }
         }
+    }
+
+    pub fn run(&mut self, input: &mut Vec<i128>) -> Vec<i128> {
+        let mut output = vec![];
+        self.run_with(input, &mut output);
+        output
     }
 
     pub fn step(&mut self, input: &mut Vec<i128>, output: &mut Vec<i128>) -> Status {
