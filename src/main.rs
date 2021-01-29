@@ -112,6 +112,7 @@ fn puzzles() -> Result<(), Box<dyn Error>> {
     puzzle(18, 'b', Box::new(util::get_parsed::<day18::Maze>), Box::new(day18::day18b))?;
 
     puzzle(19, 'a', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day19::day19a))?;
+    puzzle(19, 'b', Box::new(util::get_parsed_line::<intcode::VM>), Box::new(day19::day19b))?;
 
     println!("--- --------------- ---------------");
 
