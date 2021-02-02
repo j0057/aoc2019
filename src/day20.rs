@@ -1,8 +1,28 @@
 //
+// macros
+//
+
+macro_rules! btreemap {
+    ($($key: expr => $val: expr),+) => {{
+        let mut map = ::std::collections::BTreeMap::new();
+        $( map.insert($key, $val); )*
+        map
+    }}
+}
+
+macro_rules! vecdeque {
+    ($($val: expr),+) => {{
+        let mut queue = ::std::collections::VecDeque::new();
+        $( queue.push_back($val); )*
+        queue
+    }}
+}
+
+//
 // struct Coord
 //
 
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Copy, Hash, Eq, PartialEq, Ord, PartialOrd)]
 struct Coord(usize, usize);
 
 impl std::fmt::Debug for Coord {
@@ -11,11 +31,17 @@ impl std::fmt::Debug for Coord {
     }
 }
 
+impl Coord {
+    fn neighbours(&self) -> [Coord; 4] {
+        [Coord(self.0-1, self.1), Coord(self.0, self.1-1), Coord(self.0+1, self.1), Coord(self.0, self.1+1)]
+    }
+}
+
 //
 // enum Tile
 //
 
-#[derive(Clone)]
+#[derive(Clone, Eq, PartialEq)]
 enum Tile {
     Wall,
     Floor,
@@ -33,10 +59,11 @@ impl std::fmt::Debug for Tile {
 }
 
 //
-// type Grid
+// type Grid etc
 //
 
 type Grid = std::collections::BTreeMap<Coord, Tile>;
+type PortalIndex = std::collections::BTreeMap<Coord, Coord>;
 
 //
 // struct DonutMaze
@@ -45,12 +72,15 @@ type Grid = std::collections::BTreeMap<Coord, Tile>;
 #[derive(Debug)]
 pub struct DonutMaze {
     grid: Grid,
+    portals: PortalIndex,
 }
 
 impl DonutMaze {
     fn new(grid: Grid) -> Self {
+        let portals = Self::find_portals(&grid);
         Self {
             grid,
+            portals,
         }
     }
 
@@ -70,6 +100,43 @@ impl DonutMaze {
                 _   => None
             })
             .collect()
+    }
+
+    fn find_portals(grid: &Grid) -> PortalIndex {
+        grid.iter()
+            .filter_map(|(c1, t1)| match t1 {
+                Tile::Portal(n1) => grid.iter()
+                                        .find(|&(c2, t2)| matches!(t2, Tile::Portal(n2) if n1 == n2 && c1 != c2))
+                                        .map(|(c2, _)| (*c1, *c2)),
+                _                => None
+            })
+            .collect::<PortalIndex>()
+    }
+
+    fn shortest_path(&self, n1: &str, n2: &str) -> u64 {
+        let start = self.grid
+            .iter()
+            .find(|&(_, t)| matches!(t, Tile::Portal(n) if n == n1))
+            .unwrap().0;
+
+        let mut queue = vecdeque![*start];
+        let mut dist = btreemap![*start => 0];
+
+        while let Some(v) = queue.pop_front() {
+            if matches!(self.grid.get(&v), Some(Tile::Portal(n)) if n == n2) {
+                return *dist.get(&v).unwrap();
+            }
+
+            let warp: Option<Coord> = self.portals.get(&v).cloned();
+
+            for w in v.neighbours().iter().chain(warp.iter()) {
+                if matches!(self.grid.get(&w), Some(Tile::Floor) | Some(Tile::Portal(_)) if ! dist.contains_key(&w)) {
+                    queue.push_back(*w);
+                    dist.insert(*w, dist.get(&v).unwrap()+1);
+                }
+            }
+        }
+        unreachable!()
     }
 }
 
@@ -137,7 +204,7 @@ pub enum ParseError {
 //
 
 pub fn day20a(maze: &DonutMaze) -> u64 {
-    0
+    maze.shortest_path("AA", "ZZ")
 }
 
 pub fn day20b(maze: &DonutMaze) -> u64 {
@@ -224,7 +291,7 @@ mod test {
     fn test_20() -> Result<(), Box<dyn std::error::Error>> {
         let maze = crate::util::get_parsed("input/day20.txt")?;
         let part1 = super::day20a(&maze);
-        assert_eq!(part1, 0);
+        assert_eq!(part1, 432);
         Ok(())
     }
 }
