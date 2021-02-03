@@ -45,7 +45,8 @@ impl Coord {
 enum Tile {
     Wall,
     Floor,
-    Portal(String)
+    Inner(String),
+    Outer(String),
 }
 
 impl std::fmt::Debug for Tile {
@@ -53,7 +54,8 @@ impl std::fmt::Debug for Tile {
         match self {
             Self::Wall => write!(f, "Wall"),
             Self::Floor => write!(f, "Floor"),
-            Self::Portal(x) => write!(f, "Portal({})", x)
+            Self::Inner(x) => write!(f, "Inner({})", x),
+            Self::Outer(x) => write!(f, "Outer({})", x),
         }
     }
 }
@@ -84,19 +86,19 @@ impl DonutMaze {
         }
     }
 
-    fn scan_vert(grid: &Vec<Vec<char>>, vert: std::ops::Range<usize>, x: usize, d: fn(usize) -> usize) -> Vec<(Coord, Tile)> {
+    fn scan_vert(grid: &Vec<Vec<char>>, vert: std::ops::Range<usize>, x: usize, d: fn(usize) -> usize, p: fn(String) -> Tile) -> Vec<(Coord, Tile)> {
         vert.filter_map(|y| match grid[y][x] {
                 'A'..='Z' if matches!(grid[y][x+1], 'A'..='Z')
-                    => Some((Coord(y, d(x)), Tile::Portal([grid[y][x], grid[y][x+1]].iter().collect()))),
+                    => Some((Coord(y, d(x)), p([grid[y][x], grid[y][x+1]].iter().collect()))),
                 _   => None
             })
             .collect()
     }
 
-    fn scan_horz(grid: &Vec<Vec<char>>, horz: std::ops::Range<usize>, y: usize, d: fn(usize) -> usize) -> Vec<(Coord, Tile)> {
+    fn scan_horz(grid: &Vec<Vec<char>>, horz: std::ops::Range<usize>, y: usize, d: fn(usize) -> usize, p: fn(String) -> Tile) -> Vec<(Coord, Tile)> {
         horz.filter_map(|x| match grid[y][x] {
                 'A'..='Z' if matches!(grid[y+1][x], 'A'..='Z')
-                    => Some((Coord(d(y), x), Tile::Portal([grid[y][x], grid[y+1][x]].iter().collect()))),
+                    => Some((Coord(d(y), x), p([grid[y][x], grid[y+1][x]].iter().collect()))),
                 _   => None
             })
             .collect()
@@ -105,10 +107,12 @@ impl DonutMaze {
     fn find_portals(grid: &Grid) -> PortalIndex {
         grid.iter()
             .filter_map(|(c1, t1)| match t1 {
-                Tile::Portal(n1) => grid.iter()
-                                        .find(|&(c2, t2)| matches!(t2, Tile::Portal(n2) if n1 == n2 && c1 != c2))
-                                        .map(|(c2, _)| (*c1, *c2)),
-                _                => None
+                Tile::Inner(n1) | Tile::Outer(n1) =>
+                    grid.iter()
+                        .find(|&(c2, t2)| matches!(t2, Tile::Inner(n2) | Tile::Outer(n2) if n1 == n2 && c1 != c2))
+                        .map(|(c2, _)| (*c1, *c2)),
+                _ => None
+
             })
             .collect::<PortalIndex>()
     }
@@ -116,21 +120,21 @@ impl DonutMaze {
     fn shortest_path(&self, n1: &str, n2: &str) -> u64 {
         let start = self.grid
             .iter()
-            .find(|&(_, t)| matches!(t, Tile::Portal(n) if n == n1))
+            .find(|&(_, t)| matches!(t, Tile::Outer(n) if n == n1))
             .unwrap().0;
 
         let mut queue = vecdeque![*start];
         let mut dist = btreemap![*start => 0];
 
         while let Some(v) = queue.pop_front() {
-            if matches!(self.grid.get(&v), Some(Tile::Portal(n)) if n == n2) {
+            if matches!(self.grid.get(&v), Some(Tile::Outer(n)) if n == n2) {
                 return *dist.get(&v).unwrap();
             }
 
             let warp: Option<Coord> = self.portals.get(&v).cloned();
 
             for w in v.neighbours().iter().chain(warp.iter()) {
-                if matches!(self.grid.get(&w), Some(Tile::Floor) | Some(Tile::Portal(_)) if ! dist.contains_key(&w)) {
+                if matches!(self.grid.get(&w), Some(Tile::Floor) | Some(Tile::Inner(_)) | Some(Tile::Outer(_)) if ! dist.contains_key(&w)) {
                     queue.push_back(*w);
                     dist.insert(*w, dist.get(&v).unwrap()+1);
                 }
@@ -157,14 +161,14 @@ impl std::str::FromStr for DonutMaze {
 
         let p: Grid = []
             .iter()
-            .chain(Self::scan_vert(&g, 2..g.len()-2,   0,              |x| x+2).iter())
-            .chain(Self::scan_vert(&g, 2..g.len()-2,   g[0].len()-2,   |x| x-1).iter())
-            .chain(Self::scan_vert(&g, w..g.len()-w,   w,              |x| x-1).iter())
-            .chain(Self::scan_vert(&g, w..g.len()-w,   g[0].len()-w-2, |x| x+2).iter())
-            .chain(Self::scan_horz(&g, 2..g.len()-2,   0,              |y| y+2).iter())
-            .chain(Self::scan_horz(&g, 2..g.len()-2,   g.len()-2,      |y| y-1).iter())
-            .chain(Self::scan_horz(&g, w..g.len()-w,   w,              |y| y-1).iter())
-            .chain(Self::scan_horz(&g, w..g.len()-w,   g.len()-w-2,    |y| y+2).iter())
+            .chain(Self::scan_vert(&g, 2..g.len()-2,   0,              |x| x+2, Tile::Outer).iter())
+            .chain(Self::scan_vert(&g, 2..g.len()-2,   g[0].len()-2,   |x| x-1, Tile::Outer).iter())
+            .chain(Self::scan_vert(&g, w..g.len()-w,   w,              |x| x-1, Tile::Inner).iter())
+            .chain(Self::scan_vert(&g, w..g.len()-w,   g[0].len()-w-2, |x| x+2, Tile::Inner).iter())
+            .chain(Self::scan_horz(&g, 2..g.len()-2,   0,              |y| y+2, Tile::Outer).iter())
+            .chain(Self::scan_horz(&g, 2..g.len()-2,   g.len()-2,      |y| y-1, Tile::Outer).iter())
+            .chain(Self::scan_horz(&g, w..g.len()-w,   w,              |y| y-1, Tile::Inner).iter())
+            .chain(Self::scan_horz(&g, w..g.len()-w,   g.len()-w-2,    |y| y+2, Tile::Inner).iter())
             .cloned()
             .collect();
 
