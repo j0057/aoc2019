@@ -162,10 +162,11 @@ impl DonutMaze {
                 .filter(|_| level > 0 || matches!(self.grid.get(&v), Some(Tile::Inner(_))));
 
             let mut enqueue = |p, c| {
-                if ! dist.contains_key(&c) {
+                let cur_dist = *dist.get(&p).unwrap();
+                dist.entry(c).or_insert_with(|| {
                     queue.push_back(c);
-                    dist.insert(c, dist.get(&p).unwrap()+1);
-                }
+                    cur_dist + 1
+                });
             };
 
             for w in v.neighbours().iter().chain(warp.iter()) {
