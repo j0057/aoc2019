@@ -124,7 +124,7 @@ impl Maze {
     }
 
     fn array_replace(c: [Coord; 4], i: usize, t: Coord) -> [Coord; 4] {
-        let mut result = c.clone();
+        let mut result = c;
         result[i] = t;
         result
     }
@@ -145,7 +145,7 @@ impl Maze {
             0
         }
         else {
-            let entry = CacheEntry(source.clone(), visited.clone());
+            let entry = CacheEntry(source, visited.clone());
             if ! cache.contains_key(&entry) {
                 let len = source
                     .iter()
