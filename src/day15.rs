@@ -20,10 +20,7 @@ enum Tile {
 
 impl Tile {
     fn is_unknown(&self) -> bool {
-        match *self {
-            Tile::Unknown => true,
-            _             => false,
-        }
+        matches!(*self, Tile::Unknown)
     }
 }
 

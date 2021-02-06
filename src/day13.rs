@@ -122,10 +122,7 @@ impl Iterator for Game {
 
 pub fn day13a(vm: &intcode::VM) -> usize {
     Game::new(vm)
-        .filter(|output| match *output {
-            Output::TileUpdate(_, _, Tile::Block) => true,
-            _                                     => false
-        })
+        .filter(|output| matches!(*output, Output::TileUpdate(_, _, Tile::Block)))
         .count()
 }
 
