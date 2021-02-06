@@ -1,8 +1,6 @@
 use std::num::ParseIntError;
 use std::str::FromStr;
 
-use bytecount;
-
 //
 // enum InputError
 //

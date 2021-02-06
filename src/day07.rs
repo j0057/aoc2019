@@ -1,7 +1,5 @@
 use std::cell::RefCell;
 
-use permutohedron;
-
 use crate::intcode;
 
 pub fn day07a(vm: &intcode::VM) -> i128 {
