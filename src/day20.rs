@@ -142,6 +142,47 @@ impl DonutMaze {
         }
         unreachable!()
     }
+
+    fn recursive_path(&self, n1: &str, n2: &str) -> u64 {
+        let start: Coord = self.grid.iter().filter_map(|(c, t)| match t {
+            Tile::Outer(n) if n == n1 => Some(c),
+            _                         => None
+        }).nth(0).copied().unwrap();
+
+        let mut queue = vecdeque![(0_u64, start)];
+        let mut dist = btreemap![(0_u64, start) => 0];
+
+        while let Some((level, v)) = queue.pop_front() {
+            if level == 0 && matches!(self.grid.get(&v), Some(Tile::Outer(n)) if n == n2) {
+                return *dist.get(&(level, v)).unwrap();
+            }
+
+            let warp: Option<Coord> = self.portals.get(&v)
+                .cloned()
+                .filter(|_| level > 0 || matches!(self.grid.get(&v), Some(Tile::Inner(_))));
+
+            let mut enqueue = |p, c| {
+                if ! dist.contains_key(&c) {
+                    queue.push_back(c);
+                    dist.insert(c, dist.get(&p).unwrap()+1);
+                }
+            };
+
+            for w in v.neighbours().iter().chain(warp.iter()) {
+                let wt = self.grid.get(&w);
+                match self.grid.get(&v) {
+                    Some(Tile::Floor)                                          => enqueue((level, v), (level,   *w)),
+                    Some(Tile::Outer(_)) if matches!(wt, Some(Tile::Floor))    => enqueue((level, v), (level,   *w)),
+                    Some(Tile::Outer(_)) if matches!(wt, Some(Tile::Inner(_))) => enqueue((level, v), (level-1, *w)),
+                    Some(Tile::Inner(_)) if matches!(wt, Some(Tile::Floor))    => enqueue((level, v), (level,   *w)),
+                    Some(Tile::Inner(_)) if matches!(wt, Some(Tile::Outer(_))) => enqueue((level, v), (level+1, *w)),
+                    _                                                          => (),
+                }
+            }
+        }
+
+        panic!("no path found")
+    }
 }
 
 impl std::str::FromStr for DonutMaze {
@@ -212,7 +253,7 @@ pub fn day20a(maze: &DonutMaze) -> u64 {
 }
 
 pub fn day20b(maze: &DonutMaze) -> u64 {
-    0
+    maze.recursive_path("AA", "ZZ")
 }
 
 //
@@ -292,10 +333,56 @@ mod test {
     }
 
     #[test]
+    fn test_20_3() -> Result<(), Box<dyn std::error::Error>> {
+        let maze = concat!("             Z L X W       C                 \n",
+                           "             Z P Q B       K                 \n",
+                           "  ###########.#.#.#.#######.###############  \n",
+                           "  #...#.......#.#.......#.#.......#.#.#...#  \n",
+                           "  ###.#.#.#.#.#.#.#.###.#.#.#######.#.#.###  \n",
+                           "  #.#...#.#.#...#.#.#...#...#...#.#.......#  \n",
+                           "  #.###.#######.###.###.#.###.###.#.#######  \n",
+                           "  #...#.......#.#...#...#.............#...#  \n",
+                           "  #.#########.#######.#.#######.#######.###  \n",
+                           "  #...#.#    F       R I       Z    #.#.#.#  \n",
+                           "  #.###.#    D       E C       H    #.#.#.#  \n",
+                           "  #.#...#                           #...#.#  \n",
+                           "  #.###.#                           #.###.#  \n",
+                           "  #.#....OA                       WB..#.#..ZH\n",
+                           "  #.###.#                           #.#.#.#  \n",
+                           "CJ......#                           #.....#  \n",
+                           "  #######                           #######  \n",
+                           "  #.#....CK                         #......IC\n",
+                           "  #.###.#                           #.###.#  \n",
+                           "  #.....#                           #...#.#  \n",
+                           "  ###.###                           #.#.#.#  \n",
+                           "XF....#.#                         RF..#.#.#  \n",
+                           "  #####.#                           #######  \n",
+                           "  #......CJ                       NM..#...#  \n",
+                           "  ###.#.#                           #.###.#  \n",
+                           "RE....#.#                           #......RF\n",
+                           "  ###.###        X   X       L      #.#.#.#  \n",
+                           "  #.....#        F   Q       P      #.#.#.#  \n",
+                           "  ###.###########.###.#######.#########.###  \n",
+                           "  #.....#...#.....#.......#...#.....#.#...#  \n",
+                           "  #####.#.###.#######.#######.###.###.#.#.#  \n",
+                           "  #.......#.......#.#.#.#.#...#...#...#.#.#  \n",
+                           "  #####.###.#####.#.#.#.#.###.###.#.###.###  \n",
+                           "  #.......#.....#.#...#...............#...#  \n",
+                           "  #############.#.#.###.###################  \n",
+                           "               A O F   N                     \n",
+                           "               A A D   M                     \n").parse()?;
+        let steps = super::day20b(&maze);
+        assert_eq!(steps, 396);
+        Ok(())
+    }
+
+    #[test]
     fn test_20() -> Result<(), Box<dyn std::error::Error>> {
         let maze = crate::util::get_parsed("input/day20.txt")?;
         let part1 = super::day20a(&maze);
+        let part2 = super::day20b(&maze);
         assert_eq!(part1, 432);
+        assert_eq!(part2, 5214);
         Ok(())
     }
 }
