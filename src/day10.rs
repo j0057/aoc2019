@@ -70,7 +70,7 @@ impl AsteroidShooter {
                 .collect::<Vec<_>>()
         };
 
-        result.asteroids.sort();
+        result.asteroids.sort_unstable();
 
         while result.asteroids[0].0 < 90_000 {
             result.asteroids.rotate_left(1);
