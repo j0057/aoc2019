@@ -86,7 +86,7 @@ impl DonutMaze {
         }
     }
 
-    fn scan_vert(grid: &Vec<Vec<char>>, vert: std::ops::Range<usize>, x: usize, d: fn(usize) -> usize, p: fn(String) -> Tile) -> Vec<(Coord, Tile)> {
+    fn scan_vert(grid: &[Vec<char>], vert: std::ops::Range<usize>, x: usize, d: fn(usize) -> usize, p: fn(String) -> Tile) -> Vec<(Coord, Tile)> {
         vert.filter_map(|y| match grid[y][x] {
                 'A'..='Z' if matches!(grid[y][x+1], 'A'..='Z')
                     => Some((Coord(y, d(x)), p([grid[y][x], grid[y][x+1]].iter().collect()))),
@@ -95,7 +95,7 @@ impl DonutMaze {
             .collect()
     }
 
-    fn scan_horz(grid: &Vec<Vec<char>>, horz: std::ops::Range<usize>, y: usize, d: fn(usize) -> usize, p: fn(String) -> Tile) -> Vec<(Coord, Tile)> {
+    fn scan_horz(grid: &[Vec<char>], horz: std::ops::Range<usize>, y: usize, d: fn(usize) -> usize, p: fn(String) -> Tile) -> Vec<(Coord, Tile)> {
         horz.filter_map(|x| match grid[y][x] {
                 'A'..='Z' if matches!(grid[y+1][x], 'A'..='Z')
                     => Some((Coord(d(y), x), p([grid[y][x], grid[y+1][x]].iter().collect()))),
