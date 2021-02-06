@@ -41,7 +41,7 @@ impl Iterator for PaintRobot {
     // 1. put color to current position
     // 2. apply turn to current direction
     // 3. move one step
-    fn next(self: &mut Self) -> Option<Self::Item> {
+    fn next(&mut self) -> Option<Self::Item> {
         // try to get more output if output vector is empty
         if self.out.len() < 2 {
 
