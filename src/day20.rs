@@ -161,14 +161,14 @@ impl std::str::FromStr for DonutMaze {
 
         let p: Grid = []
             .iter()
-            .chain(Self::scan_vert(&g, 2..g.len()-2,   0,              |x| x+2, Tile::Outer).iter())
-            .chain(Self::scan_vert(&g, 2..g.len()-2,   g[0].len()-2,   |x| x-1, Tile::Outer).iter())
-            .chain(Self::scan_vert(&g, w..g.len()-w,   w,              |x| x-1, Tile::Inner).iter())
-            .chain(Self::scan_vert(&g, w..g.len()-w,   g[0].len()-w-2, |x| x+2, Tile::Inner).iter())
-            .chain(Self::scan_horz(&g, 2..g.len()-2,   0,              |y| y+2, Tile::Outer).iter())
-            .chain(Self::scan_horz(&g, 2..g.len()-2,   g.len()-2,      |y| y-1, Tile::Outer).iter())
-            .chain(Self::scan_horz(&g, w..g.len()-w,   w,              |y| y-1, Tile::Inner).iter())
-            .chain(Self::scan_horz(&g, w..g.len()-w,   g.len()-w-2,    |y| y+2, Tile::Inner).iter())
+            .chain(Self::scan_vert(&g, 2..g.len()-2,    0,              |x| x+2, Tile::Outer).iter())
+            .chain(Self::scan_vert(&g, 2..g.len()-2,    g[0].len()-2,   |x| x-1, Tile::Outer).iter())
+            .chain(Self::scan_vert(&g, w..g.len()-w,    w,              |x| x-1, Tile::Inner).iter())
+            .chain(Self::scan_vert(&g, w..g.len()-w,    g[0].len()-w-2, |x| x+2, Tile::Inner).iter())
+            .chain(Self::scan_horz(&g, 2..g[0].len()-2, 0,              |y| y+2, Tile::Outer).iter())
+            .chain(Self::scan_horz(&g, 2..g[0].len()-2, g.len()-2,      |y| y-1, Tile::Outer).iter())
+            .chain(Self::scan_horz(&g, w..g[0].len()-w, w,              |y| y-1, Tile::Inner).iter())
+            .chain(Self::scan_horz(&g, w..g[0].len()-w, g.len()-w-2,    |y| y+2, Tile::Inner).iter())
             .cloned()
             .collect();
 
