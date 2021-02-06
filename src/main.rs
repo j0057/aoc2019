@@ -132,7 +132,7 @@ enum ArgumentError {
 fn main() -> Result<(), Box<dyn Error>> {
     let arg = std::env::args().nth(1);
 
-    match arg.as_ref().map(String::as_str) {
+    match arg.as_deref() {
 
         Some("8b")  => { let input = util::get_parsed_line::<day08::Input>("input/day08.txt")?;
                          day08::day08_main(&input); },
