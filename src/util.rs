@@ -20,7 +20,7 @@ pub fn get_lines(filename: &str) -> Result<Vec<String>, Box<dyn Error>> {
 pub fn get_line(filename: &str) -> Result<String, Box<dyn Error>> {
     let file = std::fs::File::open(filename)?;
     let reader = std::io::BufReader::new(file);
-    let result = reader.lines().nth(0).ok_or("no first line found")??;
+    let result = reader.lines().next().ok_or("no first line found")??;
     Ok(result)
 }
 

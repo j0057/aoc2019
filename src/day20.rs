@@ -147,7 +147,7 @@ impl DonutMaze {
         let start: Coord = self.grid.iter().filter_map(|(c, t)| match t {
             Tile::Outer(n) if n == n1 => Some(c),
             _                         => None
-        }).nth(0).copied().unwrap();
+        }).next().copied().unwrap();
 
         let mut queue = vecdeque![(0_u64, start)];
         let mut dist = btreemap![(0_u64, start) => 0];

@@ -130,7 +130,7 @@ enum ArgumentError {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let arg = std::env::args().skip(1).nth(0);
+    let arg = std::env::args().nth(1);
 
     match arg.as_ref().map(String::as_str) {
 

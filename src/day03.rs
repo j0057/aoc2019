@@ -29,7 +29,7 @@ impl FromStr for Input {
     fn from_str(text: &str) -> Result<Self, Self::Err> {
         let t = text.trim()
                     .split(',')
-                    .map(|s| match s.chars().nth(0) {
+                    .map(|s| match s.chars().next() {
                         Some('U') => Result::Ok(Complex::<i64>::new(0, -s[1..].parse::<i64>()?)),
                         Some('D') => Result::Ok(Complex::<i64>::new(0,  s[1..].parse::<i64>()?)),
                         Some('L') => Result::Ok(Complex::<i64>::new(-s[1..].parse::<i64>()?, 0)),

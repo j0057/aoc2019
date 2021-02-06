@@ -61,7 +61,7 @@ fn combine(data: &[u8], w: usize, h: usize) -> Vec<u8> {
         .map(|layer| layer.to_vec())
         .collect::<Vec<Vec<u8>>>();
     (0..layers[0].len())
-        .map(|i| layers.iter().skip_while(|v| v[i] == 2).nth(0).unwrap()[i])
+        .map(|i| layers.iter().find(|v| v[i] != 2).unwrap()[i])
         .collect::<Vec<u8>>()
 }
 

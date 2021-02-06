@@ -63,7 +63,7 @@ impl std::str::FromStr for Action {
         match text {
             "L"         => Ok(Action::TurnLeft),
             "R"         => Ok(Action::TurnRight),
-            "A"|"B"|"C" => Ok(Action::CallSub(text.chars().nth(0).unwrap())),
+            "A"|"B"|"C" => Ok(Action::CallSub(text.chars().next().unwrap())),
             _ if text.chars().all(|ch| ch.is_digit(10))
                         => Ok(Action::MoveForward(Some(text.parse::<i32>()?))),
             _           => Err(ActionParseError::UnknownCharacter(text.into()))

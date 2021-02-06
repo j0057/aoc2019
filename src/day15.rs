@@ -115,15 +115,13 @@ impl Grid {
 
     fn bfs(&self, src: Coord, tgt: Coord) -> Vec<Coord> {
         self.iter_routes(src)
-            .filter(|route| route[0] == tgt)
-            .nth(0)
+            .find(|route| route[0] == tgt)
             .unwrap()
     }
 
     fn path_to_closest_unknown(&self, pos: Coord) -> Option<Vec<Coord>> {
         self.iter_routes(pos)
-            .filter(|route| self[*route.first().unwrap()] == Tile::Unknown)
-            .nth(0)
+            .find(|route| self[*route.first().unwrap()] == Tile::Unknown)
     }
 
     fn iter_routes(&self, src: Coord) -> RouteIter {
