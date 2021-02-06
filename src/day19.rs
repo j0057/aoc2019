@@ -13,10 +13,10 @@ pub fn day19b(vm: &VM) -> i128 {
     let mut x = 0;
     let mut y = 100;
     loop {
-        while vm.clone().run(&mut vec![x, y]) != &[1] {
+        while vm.clone().run(&mut vec![x, y]) != [1] {
             x += 1;
         }
-        if vm.clone().run(&mut vec![x + 99, y - 99]) == &[1] {
+        if vm.clone().run(&mut vec![x + 99, y - 99]) == [1] {
             break
         }
         y += 1;
