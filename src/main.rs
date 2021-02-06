@@ -118,7 +118,7 @@ fn puzzles() -> Result<(), Box<dyn Error>> {
     puzzle(20, 'a', Box::new(util::get_parsed::<day20::DonutMaze>), Box::new(day20::day20a))?;
     puzzle(20, 'b', Box::new(util::get_parsed::<day20::DonutMaze>), Box::new(day20::day20b))?;
 
-    println!("--- --------------- ---------------");
+    println!("--- ---------------- ---------------");
 
     Ok(())
 }
