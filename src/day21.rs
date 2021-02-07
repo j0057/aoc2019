@@ -28,6 +28,18 @@ pub fn day21a(vm: &intcode::VM) -> i128 {
     }
 }
 
+pub fn day21b(vm: &intcode::VM) -> i128 {
+    // https://www.reddit.com/r/adventofcode/comments/edll5a/2019_day_21_solutions/fbjujku/
+    // (I want to program Rust, not SpringScript)
+    let prog = &["NOT H J", "OR C J", "AND B J", "AND A J", "NOT J J", "AND D J", "RUN"];
+
+    match survey_hull(&vm.clone(), prog) {
+        Ok(result) => result,
+        Err(diag)  => { println!("{}", diag);
+                        panic!("program errored"); },
+    }
+}
+
 #[cfg(test)]
 mod test {
     #[test]
@@ -43,6 +55,14 @@ mod test {
         let vm = crate::util::get_parsed("./input/day21.txt")?;
         let part1 = super::day21a(&vm);
         assert_eq!(part1, 19354464);
+        Ok(())
+    }
+
+    #[test]
+    fn test_21b() -> Result<(), Box<dyn std::error::Error>> {
+        let vm = crate::util::get_parsed("./input/day21.txt")?;
+        let part2 = super::day21b(&vm);
+        assert_eq!(part2, 1143198454);
         Ok(())
     }
 }
