@@ -7,7 +7,7 @@ pub struct VM {
     pub bp: i128,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum Status {
     Halted,
     Blocked,
@@ -64,6 +64,15 @@ impl VM {
     }
 
     pub fn step(&mut self, input: &mut Vec<i128>, output: &mut Vec<i128>) -> Status {
+        self.step_impl(|| if input.is_empty() { None } else { Some(input.remove(0)) },
+                       |x| output.push(x))
+    }
+
+    pub fn step_impl<R, W>(&mut self, mut read: R, mut write: W) -> Status
+        where
+            R: FnMut() -> Option<i128>,
+            W: FnMut(i128)
+    {
         loop {
             match self.memory[self.ip] % 100 {
                 // day 2 : add
@@ -75,14 +84,15 @@ impl VM {
                          self.ip += 4; },
 
                 // day 5 : in
-                3   => { if input.is_empty() {
-                            return Status::Blocked;
+                3   => { match read() {
+                             Some(x) => { *self.arg(1) = x;
+                                          self.ip += 2 },
+                             None    => return Status::Blocked,
                          }
-                         *self.arg(1) = input.remove(0);
-                         self.ip += 2; },
+                       },
 
                 // day 5 : out
-                4   => { output.push(*self.arg(1));
+                4   => { write(*self.arg(1));
                          self.ip += 2;
                          return Status::Suspended; }
 
