@@ -42,9 +42,7 @@ impl core::str::FromStr for Bugs {
                     '#' => Ok(1 << (x + y * 5)),
                      c  => Err(Error::Parse(c)),
                 }))
-            .collect::<Result<Vec<u32>, Error>>()?
-            .into_iter()
-            .sum();
+            .try_fold(0, |a, b| Ok(a + b?))?;
         Ok(Bugs(b))
     }
 }
