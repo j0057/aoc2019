@@ -113,6 +113,47 @@ pub fn day23a(vm: &intcode::VM) -> i128 {
     unreachable!()
 }
 
+pub fn day23b(vm: &intcode::VM) -> i128 {
+    let network = CategorySix::new(vm, 50);
+    let mut last = None;
+    let mut prev = None;
+    let mut idle = 0;
+    for msg in CategorySixIterator::new(&network) {
+        match msg {
+            Some((i, x, y)) if i == 255 => {
+                last = Some((x, y));
+                idle = 0;
+            },
+            Some((i, x, y)) => {
+                network.send(i, x, y);
+                idle = 0;
+            },
+            None => {
+                idle += 1;
+                if idle > 100 {
+                    if let Some((x, y)) = last {
+                        if Some(y) == prev {
+                            return y;
+                        }
+                        else {
+                            network.send(0, x, y);
+                            prev = Some(y);
+                            idle = 0;
+                        }
+                    }
+                    else {
+                        panic!("all VMs idle and no broadcast seen yet")
+                    }
+                }
+                else {
+                    (0..50).for_each(|i| network.runnable.borrow_mut().push_back(i));
+                }
+            },
+        }
+    }
+    unreachable!()
+}
+
 //
 // tests
 //
@@ -126,6 +167,14 @@ mod test {
         let vm = util::get_parsed_line("input/day23.txt")?;
         let y = super::day23a(&vm);
         assert_eq!(y, 15416);
+        Ok(())
+    }
+
+    #[test]
+    fn test_23b() -> Result<(), Box<dyn std::error::Error>> {
+        let vm = util::get_parsed_line("input/day23.txt")?;
+        let y = super::day23b(&vm);
+        assert_eq!(y, 10946);
         Ok(())
     }
 }
