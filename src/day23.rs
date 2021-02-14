@@ -1,73 +1,121 @@
-use std::sync::mpsc;
-use std::thread;
+use std::cell::RefCell;
+use std::collections::VecDeque;
 
 use crate::intcode;
 
-#[derive(Debug, Clone, Copy)]
-enum Packet {
-    Msg(i128, i128),
-    Stop,
+//
+// struct Machine
+//
+
+struct Machine {
+    vm: intcode::VM,
+    i: Vec<i128>,
+    o: Vec<i128>,
 }
 
-fn spawn_vm_thread(mut vm: intcode::VM, addr: i128, rx: mpsc::Receiver<Packet>, tx: Vec<mpsc::Sender<Packet>>, result: mpsc::Sender<i128>) -> thread::JoinHandle<()> {
-    thread::spawn(move || {
-        let mut input = vec![addr];
-        let mut output = vec![];
-        loop {
-            if input.is_empty() {
-                match rx.try_recv() {
-                    Ok(Packet::Msg(x, y)) => input.extend(&[x, y]),
-                    Ok(Packet::Stop) => break,
-                    Err(_) => input.push(-1),
-                }
-            }
-            match vm.step(&mut input, &mut output) {
-                intcode::Status::Suspended if output.len() >= 3 => {
-                    let a = output.remove(0) as usize;
-                    let x = output.remove(0);
-                    let y = output.remove(0);
-                    match tx.get(a) {
-                        Some(tx) => tx.send(Packet::Msg(x, y)).unwrap(),
-                        None     => result.send(y).unwrap(),
-                    }
-                },
-                intcode::Status::Suspended => continue,
-                intcode::Status::Halted => break,
-                intcode::Status::Blocked => continue,
-            }
+impl Machine {
+    fn new(vm: &intcode::VM, addr: usize) -> Self {
+        Self {
+            vm: vm.clone(),
+            i: vec![addr as i128],
+            o: vec![]
         }
-    })
-}
-
-pub fn day23a(vm: &intcode::VM) -> i128 {
-    // channels for communication between VMs: each VM gets all the tx channels and its own rx channel
-    let (vm_tx, vm_rx) = std::iter::from_fn(|| Some(mpsc::channel::<Packet>()))
-        .take(50)
-        .unzip::<_, _, Vec<_>, Vec<_>>();
-
-    // channel for announcing the first result
-    let (res_tx, res_rx) = mpsc::channel::<i128>();
-
-    // kick off 50 threads
-    let handles = vm_rx
-        .into_iter()
-        .enumerate()
-        .map(|(addr, rx)| spawn_vm_thread(vm.clone(), addr as i128, rx, vm_tx.clone(), res_tx.clone()))
-        .collect::<Vec<_>>();
-
-    // wait for result
-    let result = res_rx.recv().unwrap();
-
-    // send stop message to all the VMs
-    vm_tx.iter().for_each(|tx| tx.send(Packet::Stop).unwrap());
-
-    // wait for VM threads to finish
-    for handle in handles {
-        handle.join().unwrap();
     }
 
-    result
+    fn step(&mut self) -> intcode::Status {
+        self.vm.step(&mut self.i, &mut self.o)
+    }
 }
+
+//
+// struct CategorySix
+//
+
+struct CategorySix {
+    machines: Vec<RefCell<Machine>>,
+    runnable: RefCell<VecDeque<usize>>,
+}
+
+impl CategorySix {
+    fn new(vm: &intcode::VM, count: usize) -> Self {
+        Self {
+            machines: (0..count)
+                .map(|i| RefCell::new(Machine::new(&vm, i)))
+                .collect(),
+            runnable: RefCell::new((0..count).collect()),
+        }
+    }
+
+    fn send(&self, n: i128, x: i128, y: i128) {
+        self.machines[n as usize].borrow_mut().i.extend(&[x, y]);
+        self.runnable.borrow_mut().push_back(n as usize);
+    }
+}
+
+//
+// struct CategorySixIterator
+//
+
+struct CategorySixIterator<'a> {
+    network: &'a CategorySix,
+}
+
+impl<'a> CategorySixIterator<'a> {
+    fn new(network: &'a CategorySix) -> Self {
+        Self {
+            network,
+        }
+    }
+}
+
+impl Iterator for CategorySixIterator<'_> {
+    type Item = Option<(i128, i128, i128)>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(i) = self.network.runnable.borrow_mut().pop_front() {
+            if self.network.machines[i].borrow().i.is_empty() {
+                self.network.machines[i].borrow_mut().i.push(-1);
+            }
+            let status = self.network.machines[i].borrow_mut().step();
+            match status {
+                intcode::Status::Halted => {
+                    unreachable!();
+                },
+                intcode::Status::Blocked => {
+                    continue;
+                },
+                intcode::Status::Suspended if self.network.machines[i].borrow().o.len() >= 3 => {
+                    let a = &mut self.network.machines[i].borrow_mut().o;
+                    return Some(Some((a.remove(0), a.remove(0), a.remove(0))));
+                },
+                intcode::Status::Suspended => {
+                    continue;
+                },
+            }
+        }
+        Some(None)
+    }
+}
+
+//
+// solution
+//
+
+pub fn day23a(vm: &intcode::VM) -> i128 {
+    let network = CategorySix::new(vm, 50);
+    for msg in CategorySixIterator::new(&network) {
+        match msg {
+            Some((i, _, y)) if i == 255 => return y,
+            Some((i, x, y)) => network.send(i, x, y),
+            None => (0..50).for_each(|i| network.runnable.borrow_mut().push_back(i)),
+        }
+    }
+    unreachable!()
+}
+
+//
+// tests
+//
 
 #[cfg(test)]
 mod test {
