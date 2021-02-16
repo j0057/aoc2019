@@ -1,3 +1,5 @@
+use std::iter::empty;
+use std::iter::once;
 use std::iter::successors;
 
 #[derive(Debug, thiserror::Error)]
@@ -15,7 +17,32 @@ static MASK: [u32; 25] = [0x00000022, 0x00000045, 0x0000008A, 0x00000114, 0x0000
                           0x00110400, 0x00228800, 0x00451000, 0x008A2000, 0x01044000,
                           0x00208000, 0x00510000, 0x00A20000, 0x01440000, 0x00880000];
 
+static MCUR: [u32; 25] = [0x00000022, 0x00000045, 0x0000008A, 0x00000114, 0x00000208,
+                          0x00000441, 0x000008A2, 0x00000144, 0x00002288, 0x00004110,
+                          0x00008820, 0x00010440, 0x00000000, 0x00044100, 0x00082200,
+                          0x00110400, 0x00228800, 0x00450000, 0x008A2000, 0x01044000,
+                          0x00208000, 0x00510000, 0x00A20000, 0x01440000, 0x00880000];
+
+static M_UP: [u32; 25] = [0x00000880, 0x00000080, 0x00000080, 0x00000080, 0x00002080,
+                          0x00000800, 0x00000000, 0x00000000, 0x00000000, 0x00002000,
+                          0x00000800, 0x00000000, 0x00000000, 0x00000000, 0x00002000,
+                          0x00000800, 0x00000000, 0x00000000, 0x00000000, 0x00002000,
+                          0x00020800, 0x00020000, 0x00020000, 0x00020000, 0x00022000];
+
+static M_DN: [u32; 25] = [0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+                          0x00000000, 0x00000000, 0x0000001F, 0x00000000, 0x00000000,
+                          0x00000000, 0x00108421, 0x00000000, 0x01084210, 0x00000000,
+                          0x00000000, 0x00000000, 0x01F00000, 0x00000000, 0x00000000,
+                          0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000];
+
 impl Bugs {
+    fn grow(list: &[u32]) -> Vec<u32> {
+        let mut res = list.to_vec();
+        if res.first().unwrap() & 0x00022880 != 0 { res.insert(0, 0); }
+        if res.last().unwrap()  & 0x01F8C63F != 0 { res.push(0); }
+        res
+    }
+
     fn evolve(&self) -> impl Iterator<Item=u32> {
         successors(Some(self.0), |b| {
             Some((0..25)
@@ -23,6 +50,23 @@ impl Bugs {
                  .filter_map(|(n, p)| (((b & n) == 0 && 1 <= p && p <= 2)
                                     || ((b & n) != 0 && p == 1)).then(|| n))
                  .sum())
+        })
+    }
+
+    fn evolve_recursively(&self) -> impl Iterator<Item=Vec<u32>> {
+        successors(Some(vec![0, self.0, 0]), |b| {
+            Some(empty()
+                .chain(once(0))
+                .chain(Bugs::grow(b).into_iter())
+                .chain(once(0))
+                .collect::<Vec<_>>()
+                .windows(3)
+                .map(|w| (0..25)
+                     .map(|i| (1 << i, [w[0] & M_UP[i], w[1] & MCUR[i], w[2] & M_DN[i]].iter().fold(0, |a,b| a+b.count_ones())))
+                     .filter_map(|(n, p)| (((w[1] & n) == 0 && 1 <= p && p <= 2)
+                                        || ((w[1] & n) != 0 && p == 1)).then(|| n))
+                     .sum())
+                .collect::<Vec<_>>())
         })
     }
 }
@@ -60,6 +104,13 @@ pub fn day24a(bugs: &Bugs) -> u32 {
         .unwrap()
 }
 
+pub fn day24b(bugs: &Bugs) -> u32 {
+    bugs.evolve_recursively()
+        .map(|v| v.iter().fold(0, |a, b| a + b.count_ones()))
+        .nth(200)
+        .unwrap()
+}
+
 #[cfg(test)]
 mod test {
     #[test]
@@ -86,10 +137,33 @@ mod test {
     }
 
     #[test]
+    fn test_24_2() -> Result<(), Box<dyn std::error::Error>> {
+        let bugs = "....#\n\
+                   #..#.\n\
+                   #..##\n\
+                   ..#..\n\
+                   #....\n".parse::<super::Bugs>()?;
+
+        let result = bugs.evolve_recursively()
+            .map(|v| v.iter().fold(0, |a, b| a + b.count_ones()))
+            .nth(10);
+        assert_eq!(result, Some(99));
+        Ok(())
+    }
+
+    #[test]
     fn test_24a() -> Result<(), Box<dyn std::error::Error>> {
         let bugs = crate::util::get_parsed::<super::Bugs>("input/day24.txt")?;
         let result = super::day24a(&bugs);
         assert_eq!(result, 7543003);
+        Ok(())
+    }
+
+    #[test]
+    fn test_24b() -> Result<(), Box<dyn std::error::Error>> {
+        let bugs = crate::util::get_parsed::<super::Bugs>("input/day24.txt")?;
+        let result = super::day24b(&bugs);
+        assert_eq!(result, 1975);
         Ok(())
     }
 }
