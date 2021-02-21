@@ -26,6 +26,7 @@ mod day21;
 mod day22;
 mod day23;
 mod day24;
+mod day25;
 
 extern crate itertools;
 extern crate num_complex;
@@ -167,6 +168,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         Some("18")  => { let input = util::get_parsed::<day18::Maze>("input/day18.txt")?;
                          day18::day18_main(&input)?; },
+
+        Some("25")  => { let input = util::get_parsed_line::<intcode::VM>("input/day25.txt")?;
+                         day25::day25_main(&input)?; },
 
         Some(x)     => { return Err(ArgumentError::BadArgument(x.to_owned()).into()); },
 

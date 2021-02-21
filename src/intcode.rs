@@ -1,3 +1,5 @@
+use std::io::Read;
+use std::io::Write;
 use std::str::FromStr;
 
 #[derive(Debug, Clone)]
@@ -66,6 +68,22 @@ impl VM {
     pub fn step(&mut self, input: &mut Vec<i128>, output: &mut Vec<i128>) -> Status {
         self.step_impl(|| if input.is_empty() { None } else { Some(input.remove(0)) },
                        |x| output.push(x))
+    }
+
+    pub fn run_stdio(&mut self) {
+        let stdin = std::io::stdin();
+        let stdout = std::io::stdout();
+        loop {
+            let status = self.step_impl(|| { let mut buf: [u8; 1] = [0];
+                                             stdin.lock().read_exact(&mut buf).map(|_| buf[0] as i128).ok() },
+                                        |b| { let buf: [u8; 1] = [b as u8];
+                                              stdout.lock().write_all(&buf).unwrap(); });
+            match status {
+                Status::Halted => break,
+                Status::Blocked => break,
+                Status::Suspended => continue,
+            }
+        }
     }
 
     pub fn step_impl<R, W>(&mut self, mut read: R, mut write: W) -> Status

@@ -1,0 +1,48 @@
+#!/bin/bash
+
+script() {
+    cat <<EOF
+north
+take polygon
+north
+take astrolabe
+south
+south
+west
+take hologram
+north
+east
+take space law space brochure
+west
+north
+take prime number
+south
+south
+east
+south
+east
+take weather machine
+west
+south
+take manifold
+west
+take mouse
+north
+north
+east
+EOF
+}
+
+for ((x=0; x<256; x++)); do
+    script $x \
+        | awk '/take/ && and(X, 2^k++)>0 {print} /take/ {next} {print}' X=$x \
+        | ./target/release/aoc2019 25 \
+        | awk '{a[NR]=$0} END {print a[NR-1]}' 'RS=\n\n\n' \
+        | grep -E 'and you are ejected back to the checkpoint.$' || break
+done
+
+script $x \
+    | awk '/take/ && and(X, 2^k++)>0 {print} /take/ {next} {print}' X=$x \
+    | tee /dev/stderr \
+    | ./target/release/aoc2019 25 \
+    | awk '{a[NR]=$0} END{print a[NR]}' 'RS=\n\n\n'
